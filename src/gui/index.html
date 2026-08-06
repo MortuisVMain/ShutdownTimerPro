@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ПК Таймер Ultra Pro HUD</title>
+  <link rel="icon" type="image/png" href="app_icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --card-bg: rgba(18, 24, 38, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #64748b;
+      --accent: #00f2fe;
+      --accent-glow: rgba(0, 242, 254, 0.35);
+      --danger: #ff453a;
+      --warning: #ff9f0a;
+      --green: #30d158;
+      --purple: #bf5af2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      position: relative;
+    }
+
+    .bg-glow {
+      position: absolute;
+      width: 340px;
+      height: 340px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 75%);
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background 0.5s ease;
+    }
+
+    header {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(25px);
+      border-bottom: 1px solid var(--card-border);
+      z-index: 10;
+      cursor: move;
+    }
+
+    .title-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .led-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      transition: all 0.3s ease;
+    }
+
+    .title-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .win-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .win-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text);
+    }
+
+    .win-btn.close:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    main {
+      flex: 1;
+      padding: 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1;
+      backdrop-filter: blur(30px);
+      overflow-y: auto;
+    }
+
+    /* Bento Grid */
+    .bento-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .glass-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .glass-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* HUD Ring */
+    .hud-container {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      padding: 4px 0;
+    }
+
+    .ring-wrapper {
+      position: relative;
+      width: 170px;
+      height: 170px;
+    }
+
+    svg {
+      transform: rotate(-90deg);
+      width: 170px;
+      height: 170px;
+    }
+
+    circle {
+      fill: none;
+      stroke-width: 9;
+    }
+
+    .track { stroke: rgba(255, 255, 255, 0.05); }
+
+    .progress {
+      stroke: var(--accent);
+      stroke-linecap: round;
+      stroke-dasharray: 478;
+      stroke-dashoffset: 478;
+      transition: stroke-dashoffset 0.3s ease, stroke 0.4s ease;
+      filter: drop-shadow(0 0 10px var(--accent-glow));
+    }
+
+    .timer-display {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .timer-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      text-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .timer-sub {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    /* Телеметрия железа */
+    .telemetry-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: rgba(0,0,0,0.3);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-bar-bg {
+      height: 5px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stat-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      transition: width 0.4s ease;
+    }
+
+    /* Ввод времени */
+    .time-inputs {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .input-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .time-val {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      padding: 4px 0;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .time-val:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    /* Пресеты */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .preset-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 6px 0;
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .preset-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* Смарт Защитник */
+    .guard-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .guard-header {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .guard-select {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 8px;
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Селектор режимов */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .mode-btn {
+      padding: 8px 0;
+      border: 1px solid var(--card-border);
+      border-radius: 9px;
+      background: rgba(0,0,0,0.3);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      transition: all 0.25s ease;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    /* Кнопки Snooze */
+    .snooze-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .snooze-btn {
+      flex: 1;
+      padding: 6px 0;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .snooze-btn:not(:disabled):hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+    }
+
+    .snooze-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 13px 0;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #000;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--accent-glow);
+      transition: all 0.3s ease;
+
+    }
+
+    .action-btn:hover {
+      transform: scale(1.02);
+      filter: brightness(1.1);
+    }
+
+    .action-btn.running {
+      background: var(--danger);
+      color: #fff;
+      box-shadow: 0 0 25px rgba(255, 69, 58, 0.5);
+    }
+
+    /* Fullscreen Warning Overlay */
+    .warning-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 9, 14, 0.95);
+      backdrop-filter: blur(25px);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .warning-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .warning-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--danger);
+      letter-spacing: 1px;
+
+    }
+
+    .warning-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .overlay-btns {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow" id="bgGlow"></div>
+
+  <!-- Fullscreen Warning Overlay -->
+  <div class="warning-overlay" id="warnOverlay">
+    <div class="warning-title">🚨 ВНИМАНИЕ! ВЫКЛЮЧЕНИЕ ПK</div>
+    <div class="warning-time" id="warnSecs">60</div>
+    <div class="overlay-btns">
+      <button class="action-btn" style="padding: 10px 20px; font-size:12px;" onclick="addTime(5)">+5 МИНУТ</button>
+      <button class="action-btn running" style="padding: 10px 20px; font-size:12px;" onclick="cancelTimer()">ОТМЕНИТЬ</button>
+    </div>
+  </div>
+
+  <header id="headerBar">
+    <div class="title-box">
+      <div class="led-dot" id="ledDot"></div>
+      <span class="title-text">STEAM // ULTRA HUD</span>
+    </div>
+    <div class="window-controls">
+      <button class="win-btn" onclick="pywebview.api.minimize()">—</button>
+      <button class="win-btn close" onclick="pywebview.api.close()">✕</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HUD Циферблат -->
+    <div class="hud-container">
+      <div class="ring-wrapper">
+        <svg>
+          <circle class="track" cx="85" cy="85" r="76"></circle>
+          <circle class="progress" id="progressRing" cx="85" cy="85" r="76"></circle>
+        </svg>
+        <div class="timer-display">
+          <div class="timer-time" id="timeText">00:00</div>
+          <div class="timer-sub" id="subText">READY</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Монитор ресурсов CPU / RAM -->
+    <div class="glass-card">
+      <div class="telemetry-row">
+        <div class="stat-box">
+          <div class="stat-header">
+            <span>CPU</span>
+            <span id="cpuVal">0%</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="cpuBar"></div></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-header">
+            <span>RAM</span>
+            <span id="ramVal">0%</span>
+          </div>
+          <div class="stat-bar-bg"><div class="stat-bar-fill" id="ramBar"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ввод времени -->
+    <div class="glass-card">
+      <div class="time-inputs">
+        <div class="input-group">
+          <span class="input-label" id="lblH">ЧАСЫ</span>
+          <input type="number" class="time-val" id="inpH" value="0" min="0" max="23">
+        </div>
+        <div class="input-group">
+          <span class="input-label" id="lblM">МИНУТЫ</span>
+          <input type="number" class="time-val" id="inpM" value="30" min="0" max="59">
+        </div>
+      </div>
+    </div>
+
+    <!-- Пресеты -->
+    <div class="preset-grid">
+      <div class="preset-pill" onclick="playClick(); setQuick(0, 15)">⚡ 15м</div>
+      <div class="preset-pill" onclick="playClick(); setQuick(0, 30)">🎮 30м</div>
+      <div class="preset-pill" onclick="playClick(); setQuick(1, 30)">🌙 1.5ч</div>
+      <div class="preset-pill" onclick="playClick(); setQuick(2, 0)">🚀 2ч</div>
+    </div>
+
+    <!-- Умный Защитник -->
+    <div class="glass-card guard-box">
+      <span class="guard-header">🛡️ УМНАЯ ЗАЩИТА (SMART GUARD)</span>
+      <select class="guard-select" id="guardSelect" onchange="playClick()">
+        <option value="normal">⏱ Обычный таймер</option>
+        <option value="cpu_idle">🎬 По окончанию рендера (CPU < 10%)</option>
+        <option value="process_guard">🎮 После закрытия активной игры</option>
+      </select>
+    </div>
+
+    <!-- Режимы -->
+    <div class="mode-grid">
+      <button class="mode-btn active" id="m_shutdown" onclick="playClick(); selectMode('shutdown')">
+        <span>⏻</span><span>ВЫКЛ</span>
+      </button>
+      <button class="mode-btn" id="m_sleep" onclick="playClick(); selectMode('sleep')">
+        <span>☾</span><span>СОН</span>
+      </button>
+      <button class="mode-btn" id="m_restart" onclick="playClick(); selectMode('restart')">
+        <span>⟳</span><span>СБРОС</span>
+      </button>
+      <button class="mode-btn" id="m_lock" onclick="playClick(); selectMode('lock')">
+        <span>🔒</span><span>БЛОК</span>
+      </button>
+    </div>
+
+    <!-- Snooze -->
+    <div class="snooze-row">
+      <button class="snooze-btn" id="snz1" disabled onclick="playClick(); addTime(5)">+5 МИН</button>
+      <button class="snooze-btn" id="snz2" disabled onclick="playClick(); addTime(10)">+10 МИН</button>
+      <button class="snooze-btn" id="snz3" disabled onclick="playClick(); addTime(15)">+15 МИН</button>
+    </div>
+
+    <!-- Кнопка действия -->
+    <button class="action-btn" id="actionBtn" onclick="playClick(); toggleTimer()">▶ ЗАПУСТИТЬ ТАЙМЕР</button>
+  </main>
+
+  <script>
+    // Web Audio Synthesizer (Sci-Fi Audio Clicks)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClick() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    let mode = 'shutdown';
+    let isRunning = false;
+    let totalSecs = 0;
+    let remSecs = 0;
+    let timerInterval = null;
+
+    const ring = document.getElementById('progressRing');
+    const circumference = 2 * Math.PI * 76; // ~477.5
+
+    // Drag Window
+    let isDragging = false, startX = 0, startY = 0;
+    document.getElementById('headerBar').addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('win-btn')) return;
+      isDragging = true; startX = e.screenX; startY = e.screenY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.screenX - startX;
+      const dy = e.screenY - startY;
+      startX = e.screenX; startY = e.screenY;
+      if (window.pywebview) pywebview.api.move_window(dx, dy);
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    const colors = {
+      shutdown: { main: '#ff453a', glow: 'rgba(255, 69, 58, 0.35)' },
+      sleep:    { main: '#bf5af2', glow: 'rgba(191, 90, 242, 0.35)' },
+      restart:  { main: '#00f2fe', glow: 'rgba(0, 242, 254, 0.35)' },
+      lock:     { main: '#ffd60a', glow: 'rgba(255, 214, 10, 0.35)' }
+    };
+
+    function selectMode(m) {
+      mode = m;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('m_' + m).classList.add('active');
+      
+      const col = colors[m];
+      document.documentElement.style.setProperty('--accent', col.main);
+      document.documentElement.style.setProperty('--accent-glow', col.glow);
+      updatePreview();
+    }
+
+    function setQuick(h, m) {
+      if (isRunning) return;
+      document.getElementById('inpH').value = h;
+      document.getElementById('inpM').value = m;
+      updatePreview();
+    }
+
+    function calculateTotalSecs() {
+      const h = parseInt(document.getElementById('inpH').value || 0);
+      const m = parseInt(document.getElementById('inpM').value || 0);
+      return h * 3600 + m * 60;
+    }
+
+    function updatePreview() {
+      if (isRunning) return;
+      const secs = calculateTotalSecs();
+      const h = Math.floor(secs / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      document.getElementById('timeText').innerText = 
+        String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      
+      const names = { shutdown: 'ВЫКЛЮЧЕНИЕ', sleep: 'СОН', restart: 'ПЕРЕЗАГРУЗКА', lock: 'БЛОКИРОВКА' };
+      document.getElementById('subText').innerText = names[mode] + ' READY';
+      ring.style.strokeDashoffset = circumference;
+    }
+
+    document.getElementById('inpH').addEventListener('input', updatePreview);
+    document.getElementById('inpM').addEventListener('input', updatePreview);
+
+    function toggleTimer() {
+      if (isRunning) cancelTimer();
+      else startTimer();
+    }
+
+    function startTimer() {
+      const secs = calculateTotalSecs();
+      if (secs <= 0) return;
+      
+      totalSecs = remSecs = secs;
+      isRunning = true;
+
+      document.getElementById('actionBtn').innerText = '✕ ОТМЕНИТЬ ТАЙМЕР';
+      document.getElementById('actionBtn').classList.add('running');
+      document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = false);
+
+      const guard = document.getElementById('guardSelect').value;
+      if (window.pywebview) pywebview.api.launch_action(mode, secs, guard);
+
+      timerInterval = setInterval(() => {
+        remSecs--;
+        
+        // Show Fullscreen Warning Overlay at 60s
+        if (remSecs === 60) {
+          document.getElementById('warnOverlay').classList.add('active');
+        }
+        if (remSecs <= 60 && remSecs > 0) {
+          document.getElementById('warnSecs').innerText = remSecs;
+        }
+
+        if (remSecs <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('warnOverlay').classList.remove('active');
+          if (window.pywebview) pywebview.api.execute_action(mode);
+          cancelTimer();
+          return;
+        }
+
+        const h = Math.floor(remSecs / 3600);
+        const m = Math.floor((remSecs % 3600) / 60);
+        document.getElementById('timeText').innerText = 
+          String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        document.getElementById('subText').innerText = 'ОСТАЛОСЬ ' + remSecs + ' СЕК';
+
+        const offset = circumference - (remSecs / totalSecs) * circumference;
+        ring.style.strokeDashoffset = offset;
+      }, 1000);
+    }
+
+    function cancelTimer() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('warnOverlay').classList.remove('active');
+      document.getElementById('actionBtn').innerText = '▶ ЗАПУСТИТЬ ТАЙМЕР';
+      document.getElementById('actionBtn').classList.remove('running');
+      document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = true);
+
+      if (window.pywebview) pywebview.api.cancel_action();
+      updatePreview();
+    }
+
+    function addTime(mins) {
+      if (isRunning) {
+        remSecs += mins * 60;
+        totalSecs += mins * 60;
+        document.getElementById('warnOverlay').classList.remove('active');
+      }
+    }
+
+    // Scroll adjustment
+    document.querySelectorAll('.time-val').forEach(input => {
+      input.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        if (isRunning) return;
+        let val = parseInt(input.value || 0) + (e.deltaY < 0 ? 1 : -1);
+        const max = input.id === 'inpH' ? 23 : 59;
+        if (val < 0) val = max;
+        if (val > max) val = 0;
+        input.value = val;
+        updatePreview();
+      });
+    });
+
+    // Real-time Telemetry Polling (CPU / RAM)
+    setInterval(async () => {
+      if (window.pywebview && window.pywebview.api) {
+        try {
+          const stats = await window.pywebview.api.get_system_stats();
+          document.getElementById('cpuVal').innerText = stats.cpu + '%';
+          document.getElementById('cpuBar').style.width = stats.cpu + '%';
+          document.getElementById('ramVal').innerText = stats.ram + '%';
+          document.getElementById('ramBar').style.width = stats.ram + '%';
+        } catch(e){}
+      }
+    }, 2000);
+
+    updatePreview();
+  </script>
+</body>
+</html>
