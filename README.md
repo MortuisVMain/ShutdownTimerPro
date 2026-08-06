@@ -1,6 +1,6 @@
 # ⚡ ShutdownTimerPro (ПК Таймер Ultra Pro HUD)
 
-[![Release](https://img.shields.io/badge/release-v0.1.0--alpha-orange.svg)](https://github.com/MortuisVMain/ShutdownTimerPro/releases)
+[![Release](https://img.shields.io/badge/release-v0.1.1--alpha-orange.svg)](https://github.com/MortuisVMain/ShutdownTimerPro/releases)
 [![Status](https://img.shields.io/badge/status-Early%20Alpha-red.svg)](https://github.com/MortuisVMain/ShutdownTimerPro)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![GUI Framework](https://img.shields.io/badge/GUI-pywebview%20%2B%20HTML5-cyan.svg)](https://pywebview.flowrl.com/)
@@ -9,22 +9,23 @@
 
 A modern, high-tech PC Shutdown Timer & Power Manager featuring a **Cyber HUD Interface**, real-time hardware telemetry (CPU & RAM), web audio effects, and Smart Guard protections.
 
-> 🚧 **Note**: This project is currently in early **Alpha Development (v0.1.0-alpha)**. Active work and refinements are ongoing.
+> 🚧 **Note**: Current Version: **v0.1.1-alpha**.
 
 ---
 
 ## ✨ Features
 
 - 🖥️ **Cyber HUD Interface**: Frameless, sleek Glassmorphism UI built with PyWebview, HTML5, CSS3, and Google Outfit/JetBrains Mono fonts.
+- 🔒 **Single Instance Lock**: Prevents duplicate app instances and focuses the existing window on second launch.
+- 📌 **System Tray Integration**: Minimize to Windows tray with dynamic tooltip and context menu (Show, Cancel, Exit).
 - 📊 **Real-time Hardware Telemetry**: Live CPU and RAM load monitoring built into the main dashboard.
-- 🛡️ **Smart Guard Protection**:
+- 🛡️ **Smart Guard Protections**:
   - **Normal Timer**: Traditional countdown timer for specified hours & minutes.
-  - **CPU Idle Guard**: Automatically triggers power action after heavy tasks finish (e.g. video rendering or compiling) when CPU usage drops below 10%.
-- ⚡ **Quick Presets & Snooze**:
-  - Presets: 15m, 30m, 1.5h, 2h.
-  - Quick Snooze buttons (+5m, +10m, +15m).
-- 🚨 **Fullscreen Warning Overlay**: Visual 60-second countdown warning before executing shutdown/sleep/restart actions.
-- 🔊 **Web Audio Synthesizer**: Built-in Sci-Fi audio feedback for interactions using the Web Audio API.
+  - **CPU Idle Guard**: Triggers action when CPU drops below 10% after heavy rendering/compiling.
+  - **Process Guard**: Triggers action immediately when a target `.exe` process closes (games, renders).
+  - **Network Guard**: Triggers action when download speed drops below threshold (< 100 KB/s).
+- 🔊 **Audio Controls & Beeps**: Mute toggle button and countdown audio beeps for the last 10 seconds.
+- ⌨️ **Keyboard Hotkeys**: `Space` to start/pause timer, `Esc` to cancel timer.
 - ⚡ **4 Power Modes**:
   - ⏻ **Shutdown** (`shutdown -s`)
   - ☾ **Sleep** (`powrprof.dll,SetSuspendState`)
@@ -33,43 +34,20 @@ A modern, high-tech PC Shutdown Timer & Power Manager featuring a **Cyber HUD In
 
 ---
 
-## 📥 Download Early Alpha (.exe)
+## 📥 Download Release (.exe)
 
-You can download the pre-compiled standalone **v0.1.0-alpha** `.exe` file directly from the [Releases](https://github.com/MortuisVMain/ShutdownTimerPro/releases) page. No Python installation required!
+Download the pre-compiled standalone executable directly from the [Releases Page](https://github.com/MortuisVMain/ShutdownTimerPro/releases/tag/v0.1.1-alpha):
+- 📦 **[ShutdownTimerPro_v0.1.1-alpha.exe](https://github.com/MortuisVMain/ShutdownTimerPro/releases/download/v0.1.1-alpha/ShutdownTimerPro_v0.1.1-alpha.exe)**
 
 ---
 
 ## 🛠️ Installation & Running from Source
 
-### Prerequisites
-- Python 3.10+
-- Windows 10 / 11
-
-### 1. Clone the repository
 ```bash
 git clone https://github.com/MortuisVMain/ShutdownTimerPro.git
 cd ShutdownTimerPro
-```
-
-### 2. Install dependencies
-```bash
 pip install -r requirements.txt
-```
-
-### 3. Run the application
-```bash
 python src/main.py
-```
-
----
-
-## 📦 Building Standalone Executable (.exe)
-
-To compile the application into a single standalone `.exe` using PyInstaller:
-
-```bash
-pip install pyinstaller
-pyinstaller --noconfirm --onedir --windowed --icon="src/assets/app_icon.ico" --add-data "src/gui;gui" --name "ShutdownTimerPro" src/main.py
 ```
 
 ---
