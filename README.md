@@ -1,11 +1,15 @@
 # ⚡ ShutdownTimerPro (ПК Таймер Ultra Pro HUD)
 
+[![Release](https://img.shields.io/badge/release-v0.9.0--beta-orange.svg)](https://github.com/MortuisVMain/ShutdownTimerPro/releases)
+[![Status](https://img.shields.io/badge/status-Beta%20Preview-yellow.svg)](https://github.com/MortuisVMain/ShutdownTimerPro)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![GUI Framework](https://img.shields.io/badge/GUI-pywebview%20%2B%20HTML5-cyan.svg)](https://pywebview.flowrl.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6.svg)](https://microsoft.com/windows)
 
 A modern, high-tech PC Shutdown Timer & Power Manager featuring a **Cyber HUD Interface**, real-time hardware telemetry (CPU & RAM), web audio effects, and Smart Guard protections.
+
+> 🚧 **Note**: This project is currently in active **Beta Development (v0.9.0-beta)**. New features, improvements, and UI refinements are continuously being added.
 
 ---
 
@@ -29,9 +33,9 @@ A modern, high-tech PC Shutdown Timer & Power Manager featuring a **Cyber HUD In
 
 ---
 
-## 📥 Download Executable
+## 📥 Download Beta (.exe)
 
-You can download the pre-compiled standalone `.exe` file directly from the [Releases](https://github.com/MortuisVMain/ShutdownTimerPro/releases) page. No Python installation required!
+You can download the pre-compiled standalone **v0.9.0-beta** `.exe` file directly from the [Releases](https://github.com/MortuisVMain/ShutdownTimerPro/releases) page. No Python installation required!
 
 ---
 
