@@ -345,6 +345,13 @@
       cursor: pointer;
     }
 
+    .guard-sub-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
     /* Селектор режимов */
     .mode-grid {
       display: grid;
@@ -417,7 +424,6 @@
       cursor: pointer;
       box-shadow: 0 0 20px var(--accent-glow);
       transition: all 0.3s ease;
-
     }
 
     .action-btn:hover {
@@ -458,7 +464,6 @@
       font-weight: 900;
       color: var(--danger);
       letter-spacing: 1px;
-
     }
 
     .warning-time {
@@ -472,11 +477,40 @@
       display: flex;
       gap: 10px;
     }
+
+    /* Toast Notification */
+    .toast-banner {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(255, 69, 58, 0.9);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+      z-index: 120;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    .toast-banner.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow" id="bgGlow"></div>
+
+  <!-- Toast Notification -->
+  <div class="toast-banner" id="toast"></div>
 
   <!-- Fullscreen Warning Overlay -->
   <div class="warning-overlay" id="warnOverlay">
@@ -494,6 +528,7 @@
       <span class="title-text">STEAM // ULTRA HUD</span>
     </div>
     <div class="window-controls">
+      <button class="win-btn" id="soundBtn" title="Переключить звук [Mute]" onclick="toggleMute()">🔊</button>
       <button class="win-btn" onclick="pywebview.api.minimize()">—</button>
       <button class="win-btn close" onclick="pywebview.api.close()">✕</button>
     </div>
@@ -559,11 +594,23 @@
     <!-- Умный Защитник -->
     <div class="glass-card guard-box">
       <span class="guard-header">🛡️ УМНАЯ ЗАЩИТА (SMART GUARD)</span>
-      <select class="guard-select" id="guardSelect" onchange="playClick()">
+      <select class="guard-select" id="guardSelect" onchange="playClick(); onGuardSelectChange();">
         <option value="normal">⏱ Обычный таймер</option>
         <option value="cpu_idle">🎬 По окончанию рендера (CPU < 10%)</option>
-        <option value="process_guard">🎮 После закрытия активной игры</option>
+        <option value="process_guard">🎮 Process Guard (закрытие .exe)</option>
+        <option value="network_guard">📡 Network Guard (конец скачивания)</option>
       </select>
+
+      <div class="guard-sub-row" id="procGuardRow" style="display: none;">
+        <select class="guard-select" id="procSelect" style="flex:1;"></select>
+        <button class="win-btn" title="Обновить список процессов" onclick="loadProcesses()">🔄</button>
+      </div>
+
+      <div class="guard-sub-row" id="netGuardRow" style="display: none;">
+        <span style="font-size:10px; color:var(--muted);">Порог скорости:</span>
+        <input type="number" id="netThreshold" value="100" class="time-val" style="width: 70px; font-size:14px; padding:2px 0;">
+        <span style="font-size:10px; color:var(--muted);">КБ/с</span>
+      </div>
     </div>
 
     <!-- Режимы -->
@@ -596,7 +643,10 @@
   <script>
     // Web Audio Synthesizer (Sci-Fi Audio Clicks)
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let isMuted = false;
+
     function playClick() {
+      if (isMuted) return;
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
@@ -609,6 +659,36 @@
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.05);
+    }
+
+    function playBeep(freq = 600) {
+      if (isMuted) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.15);
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊';
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.set_sound_muted(isMuted);
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
     }
 
     let mode = 'shutdown';
@@ -683,24 +763,78 @@
     document.getElementById('inpH').addEventListener('input', updatePreview);
     document.getElementById('inpM').addEventListener('input', updatePreview);
 
+    function onGuardSelectChange() {
+      const val = document.getElementById('guardSelect').value;
+      document.getElementById('procGuardRow').style.display = (val === 'process_guard') ? 'flex' : 'none';
+      document.getElementById('netGuardRow').style.display = (val === 'network_guard') ? 'flex' : 'none';
+
+      if (val === 'process_guard') {
+        loadProcesses();
+      }
+    }
+
+    async function loadProcesses() {
+      if (window.pywebview && window.pywebview.api) {
+        try {
+          const procs = await window.pywebview.api.get_running_processes();
+          const sel = document.getElementById('procSelect');
+          sel.innerHTML = '';
+          if (procs.length === 0) {
+            sel.innerHTML = '<option value="">(Процессы не найдены)</option>';
+          } else {
+            procs.forEach(p => {
+              const opt = document.createElement('option');
+              opt.value = p;
+              opt.innerText = p;
+              sel.appendChild(opt);
+            });
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
+    }
+
     function toggleTimer() {
       if (isRunning) cancelTimer();
       else startTimer();
     }
 
-    function startTimer() {
+    async function startTimer() {
       const secs = calculateTotalSecs();
-      if (secs <= 0) return;
+      const guard = document.getElementById('guardSelect').value;
+
+      if (secs <= 0 && guard === 'normal') {
+        showToast('Укажите время работы таймера!');
+        return;
+      }
       
-      totalSecs = remSecs = secs;
+      let guardParam = null;
+      if (guard === 'process_guard') {
+        guardParam = document.getElementById('procSelect').value;
+        if (!guardParam) {
+          showToast('Выберите процесс для мониторинга!');
+          return;
+        }
+      } else if (guard === 'network_guard') {
+        guardParam = document.getElementById('netThreshold').value || 100;
+      }
+
+      totalSecs = remSecs = (secs > 0 ? secs : 3600);
       isRunning = true;
 
       document.getElementById('actionBtn').innerText = '✕ ОТМЕНИТЬ ТАЙМЕР';
       document.getElementById('actionBtn').classList.add('running');
       document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = false);
 
-      const guard = document.getElementById('guardSelect').value;
-      if (window.pywebview) pywebview.api.launch_action(mode, secs, guard);
+      if (window.pywebview && window.pywebview.api) {
+        const res = await window.pywebview.api.launch_action(mode, totalSecs, guard, guardParam);
+        if (res && res.success === false) {
+          showToast(res.error || 'Ошибка запуска таймера');
+          cancelTimer();
+          return;
+        }
+      }
 
       timerInterval = setInterval(() => {
         remSecs--;
@@ -713,10 +847,15 @@
           document.getElementById('warnSecs').innerText = remSecs;
         }
 
+        // Countdown audio alert for last 10s
+        if (remSecs <= 10 && remSecs > 0) {
+          playBeep(400 + (11 - remSecs) * 40);
+        }
+
         if (remSecs <= 0) {
           clearInterval(timerInterval);
           document.getElementById('warnOverlay').classList.remove('active');
-          if (window.pywebview) pywebview.api.execute_action(mode);
+          if (window.pywebview) window.pywebview.api.execute_action(mode);
           cancelTimer();
           return;
         }
@@ -740,7 +879,9 @@
       document.getElementById('actionBtn').classList.remove('running');
       document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = true);
 
-      if (window.pywebview) pywebview.api.cancel_action();
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.cancel_action();
+      }
       updatePreview();
     }
 
@@ -751,6 +892,22 @@
         document.getElementById('warnOverlay').classList.remove('active');
       }
     }
+
+    // Hotkeys (Space for Start/Pause, Esc for Cancel)
+    window.addEventListener('keydown', (e) => {
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+      if (activeTag === 'input' || activeTag === 'select') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        playClick();
+        toggleTimer();
+      } else if (e.code === 'Escape') {
+        e.preventDefault();
+        playClick();
+        cancelTimer();
+      }
+    });
 
     // Scroll adjustment
     document.querySelectorAll('.time-val').forEach(input => {
@@ -766,7 +923,17 @@
       });
     });
 
-    // Real-time Telemetry Polling (CPU / RAM)
+    // Initial Load & Telemetry Polling (CPU / RAM)
+    window.addEventListener('DOMContentLoaded', async () => {
+      if (window.pywebview && window.pywebview.api) {
+        try {
+          const muted = await window.pywebview.api.get_sound_muted();
+          isMuted = !!muted;
+          document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊';
+        } catch(e){}
+      }
+    });
+
     setInterval(async () => {
       if (window.pywebview && window.pywebview.api) {
         try {
