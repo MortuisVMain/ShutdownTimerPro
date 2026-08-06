@@ -909,8 +909,16 @@
       }
     });
 
-    // Scroll adjustment
+    // Scroll & Typing input validation
     document.querySelectorAll('.time-val').forEach(input => {
+      input.addEventListener('input', () => {
+        let max = input.id === 'inpH' ? 23 : 59;
+        let val = parseInt(input.value);
+        if (isNaN(val) || val < 0) input.value = 0;
+        else if (val > max) input.value = max;
+        updatePreview();
+      });
+
       input.addEventListener('wheel', (e) => {
         e.preventDefault();
         if (isRunning) return;
