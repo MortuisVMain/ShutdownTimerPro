@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ПК Таймер Ultra Pro HUD</title>
+  <title>ПК Таймер Ultra Pro HUD 2.0</title>
   <link rel="icon" type="image/png" href="app_icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #07090e;
-      --card-bg: rgba(18, 24, 38, 0.7);
+      --card-bg: rgba(15, 21, 34, 0.75);
       --card-border: rgba(255, 255, 255, 0.08);
       --text: #f8fafc;
       --muted: #64748b;
       --accent: #00f2fe;
       --accent-glow: rgba(0, 242, 254, 0.35);
       --danger: #ff453a;
+      --danger-glow: rgba(255, 69, 58, 0.4);
       --warning: #ff9f0a;
       --green: #30d158;
       --purple: #bf5af2;
@@ -28,7 +29,7 @@
       margin: 0;
       padding: 0;
       user-select: none;
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Outfit', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
     }
 
     body {
@@ -46,15 +47,15 @@
 
     .bg-glow {
       position: absolute;
-      width: 340px;
-      height: 340px;
+      width: 360px;
+      height: 360px;
       background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 75%);
-      top: -120px;
+      top: -130px;
       left: 50%;
       transform: translateX(-50%);
       pointer-events: none;
       z-index: 0;
-      transition: background 0.5s ease;
+      transition: background 0.4s ease;
     }
 
     header {
@@ -63,10 +64,11 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
-      background: rgba(11, 15, 25, 0.85);
+      background: rgba(11, 15, 25, 0.88);
       backdrop-filter: blur(25px);
       border-bottom: 1px solid var(--card-border);
       z-index: 10;
+      -webkit-app-region: drag;
       cursor: move;
     }
 
@@ -86,15 +88,16 @@
     }
 
     .title-text {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 11px;
+      font-weight: 800;
       letter-spacing: 1.5px;
     }
 
     .window-controls {
       display: flex;
       gap: 6px;
+      -webkit-app-region: no-drag;
     }
 
     .win-btn {
@@ -108,7 +111,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 12px;
       transition: all 0.2s ease;
     }
 
@@ -124,30 +127,23 @@
 
     main {
       flex: 1;
-      padding: 14px 20px;
+      padding: 12px 18px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       z-index: 1;
       backdrop-filter: blur(30px);
       overflow-y: auto;
     }
 
-    /* Bento Grid */
-    .bento-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
     .glass-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 10px 14px;
+      border-radius: 12px;
+      padding: 9px 12px;
       backdrop-filter: blur(20px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: border-color 0.2s ease;
     }
 
     .glass-card:hover {
@@ -159,24 +155,24 @@
       display: flex;
       justify-content: center;
       position: relative;
-      padding: 4px 0;
+      padding: 2px 0;
     }
 
     .ring-wrapper {
       position: relative;
-      width: 170px;
-      height: 170px;
+      width: 156px;
+      height: 156px;
     }
 
     svg {
       transform: rotate(-90deg);
-      width: 170px;
-      height: 170px;
+      width: 156px;
+      height: 156px;
     }
 
     circle {
       fill: none;
-      stroke-width: 9;
+      stroke-width: 8;
     }
 
     .track { stroke: rgba(255, 255, 255, 0.05); }
@@ -184,9 +180,9 @@
     .progress {
       stroke: var(--accent);
       stroke-linecap: round;
-      stroke-dasharray: 478;
-      stroke-dashoffset: 478;
-      transition: stroke-dashoffset 0.3s ease, stroke 0.4s ease;
+      stroke-dasharray: 440;
+      stroke-dashoffset: 440;
+      transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease;
       filter: drop-shadow(0 0 10px var(--accent-glow));
     }
 
@@ -199,15 +195,15 @@
     }
 
     .timer-time {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 36px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 32px;
       font-weight: 800;
       letter-spacing: -1px;
       text-shadow: 0 0 15px var(--accent-glow);
     }
 
     .timer-sub {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       letter-spacing: 1px;
       color: var(--accent);
@@ -215,16 +211,16 @@
       margin-top: 1px;
     }
 
-    /* Телеметрия железа */
+    /* Телеметрия */
     .telemetry-row {
       display: flex;
-      gap: 12px;
+      gap: 8px;
     }
 
     .stat-box {
       flex: 1;
-      background: rgba(0,0,0,0.3);
-      padding: 6px 10px;
+      background: rgba(0,0,0,0.35);
+      padding: 5px 8px;
       border-radius: 8px;
       border: 1px solid var(--card-border);
     }
@@ -232,16 +228,16 @@
     .stat-header {
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: var(--muted);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
 
     .stat-bar-bg {
-      height: 5px;
+      height: 4px;
       background: rgba(255,255,255,0.06);
-      border-radius: 3px;
+      border-radius: 2px;
       overflow: hidden;
     }
 
@@ -253,10 +249,39 @@
       transition: width 0.4s ease;
     }
 
+    /* Переключатель режима времени */
+    .time-type-tabs {
+      display: flex;
+      gap: 6px;
+      background: rgba(0,0,0,0.4);
+      padding: 3px;
+      border-radius: 9px;
+      border: 1px solid var(--card-border);
+    }
+
+    .time-tab {
+      flex: 1;
+      padding: 5px 0;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--muted);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .time-tab.active {
+      background: rgba(255,255,255,0.1);
+      color: var(--accent);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
     /* Ввод времени */
     .time-inputs {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      align-items: center;
     }
 
     .input-group {
@@ -267,20 +292,20 @@
     }
 
     .input-label {
-      font-size: 9px;
-      font-weight: 700;
+      font-size: 8px;
+      font-weight: 800;
       color: var(--muted);
       letter-spacing: 1px;
     }
 
     .time-val {
-      background: rgba(0, 0, 0, 0.4);
+      background: rgba(0, 0, 0, 0.5);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 22px;
-      font-weight: 700;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 20px;
+      font-weight: 800;
       text-align: center;
       padding: 4px 0;
       outline: none;
@@ -289,23 +314,23 @@
 
     .time-val:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
+      box-shadow: 0 0 10px var(--accent-glow);
     }
 
     /* Пресеты */
     .preset-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      gap: 5px;
     }
 
     .preset-pill {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 6px 0;
+      border-radius: 7px;
+      padding: 5px 0;
       color: var(--text);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
@@ -316,21 +341,43 @@
       background: rgba(255, 255, 255, 0.1);
       border-color: var(--accent);
       color: var(--accent);
-      transform: translateY(-2px);
     }
 
-    /* Смарт Защитник */
-    .guard-box {
+    /* Смарт Защитник & Keep-Awake */
+    .guard-header-row {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
     }
 
     .guard-header {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 9px;
+      font-weight: 800;
       color: var(--muted);
       letter-spacing: 1px;
+    }
+
+    .caffeine-toggle {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      transition: all 0.2s ease;
+    }
+
+    .caffeine-toggle.active {
+      background: rgba(48, 209, 88, 0.15);
+      border-color: var(--green);
+      color: var(--green);
+      box-shadow: 0 0 10px rgba(48, 209, 88, 0.3);
     }
 
     .guard-select {
@@ -339,50 +386,51 @@
       color: var(--text);
       font-size: 11px;
       font-weight: 600;
-      padding: 6px 8px;
+      padding: 5px 8px;
       border-radius: 8px;
       outline: none;
       cursor: pointer;
+      width: 100%;
     }
 
     .guard-sub-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       margin-top: 4px;
     }
 
-    /* Селектор режимов */
+    /* 5 Режимов действия (Включая Дисплей/Монитор) */
     .mode-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
     }
 
     .mode-btn {
-      padding: 8px 0;
+      padding: 7px 0;
       border: 1px solid var(--card-border);
-      border-radius: 9px;
+      border-radius: 8px;
       background: rgba(0,0,0,0.3);
       color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
+      font-size: 10px;
+      font-weight: 800;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
     }
 
     .mode-btn.active {
       background: var(--accent);
       color: #000;
       border-color: var(--accent);
-      box-shadow: 0 0 15px var(--accent-glow);
+      box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Кнопки Snooze */
+    /* Snooze */
     .snooze-row {
       display: flex;
       gap: 6px;
@@ -392,10 +440,10 @@
       flex: 1;
       padding: 6px 0;
       border: 1px solid var(--card-border);
-      border-radius: 8px;
+      border-radius: 7px;
       background: rgba(255, 255, 255, 0.04);
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -407,48 +455,48 @@
     }
 
     .snooze-btn:disabled {
-      opacity: 0.3;
+      opacity: 0.25;
       cursor: not-allowed;
     }
 
     .action-btn {
       width: 100%;
-      padding: 13px 0;
+      padding: 12px 0;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       background: var(--accent);
       color: #000;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       letter-spacing: 1px;
       cursor: pointer;
-      box-shadow: 0 0 20px var(--accent-glow);
-      transition: all 0.3s ease;
+      box-shadow: 0 0 16px var(--accent-glow);
+      transition: all 0.2s ease;
     }
 
     .action-btn:hover {
-      transform: scale(1.02);
+      transform: scale(1.01);
       filter: brightness(1.1);
     }
 
     .action-btn.running {
       background: var(--danger);
       color: #fff;
-      box-shadow: 0 0 25px rgba(255, 69, 58, 0.5);
+      box-shadow: 0 0 20px var(--danger-glow);
     }
 
-    /* Fullscreen Warning Overlay */
+    /* Warning Overlay */
     .warning-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(7, 9, 14, 0.95);
+      background: rgba(7, 9, 14, 0.96);
       backdrop-filter: blur(25px);
       z-index: 100;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 14px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
@@ -460,37 +508,32 @@
     }
 
     .warning-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 900;
       color: var(--danger);
       letter-spacing: 1px;
     }
 
     .warning-time {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 48px;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 46px;
       font-weight: 800;
       color: var(--text);
     }
 
-    .overlay-btns {
-      display: flex;
-      gap: 10px;
-    }
-
-    /* Toast Notification */
+    /* Toast */
     .toast-banner {
       position: absolute;
-      bottom: 20px;
+      bottom: 16px;
       left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(255, 69, 58, 0.9);
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(255, 69, 58, 0.95);
       color: #fff;
-      padding: 8px 16px;
-      border-radius: 10px;
+      padding: 7px 14px;
+      border-radius: 8px;
       font-size: 11px;
       font-weight: 700;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
       z-index: 120;
       opacity: 0;
       transition: all 0.3s ease;
@@ -503,44 +546,46 @@
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
+
+    .toast-banner.success {
+      background: rgba(48, 209, 88, 0.95);
+    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow" id="bgGlow"></div>
-
-  <!-- Toast Notification -->
   <div class="toast-banner" id="toast"></div>
 
-  <!-- Fullscreen Warning Overlay -->
+  <!-- Warning Overlay -->
   <div class="warning-overlay" id="warnOverlay">
-    <div class="warning-title">🚨 ВНИМАНИЕ! ВЫКЛЮЧЕНИЕ ПK</div>
+    <div class="warning-title">🚨 ВНИМАНИЕ! ЗАВЕРШЕНИЕ РАБОТЫ</div>
     <div class="warning-time" id="warnSecs">60</div>
-    <div class="overlay-btns">
-      <button class="action-btn" style="padding: 10px 20px; font-size:12px;" onclick="addTime(5)">+5 МИНУТ</button>
-      <button class="action-btn running" style="padding: 10px 20px; font-size:12px;" onclick="cancelTimer()">ОТМЕНИТЬ</button>
+    <div style="display:flex; gap:8px;">
+      <button class="action-btn" style="padding: 8px 16px; font-size:11px;" onclick="snooze(5)">+5 МИНУТ</button>
+      <button class="action-btn running" style="padding: 8px 16px; font-size:11px;" onclick="cancelTimer()">ОТМЕНИТЬ</button>
     </div>
   </div>
 
   <header id="headerBar">
     <div class="title-box">
       <div class="led-dot" id="ledDot"></div>
-      <span class="title-text">STEAM // ULTRA HUD</span>
+      <span class="title-text">CYBER HUD // v0.2.0</span>
     </div>
     <div class="window-controls">
-      <button class="win-btn" id="soundBtn" title="Переключить звук [Mute]" onclick="toggleMute()">🔊</button>
+      <button class="win-btn" id="soundBtn" title="Звук [Mute]" onclick="toggleMute()">🔊</button>
       <button class="win-btn" onclick="pywebview.api.minimize()">—</button>
       <button class="win-btn close" onclick="pywebview.api.close()">✕</button>
     </div>
   </header>
 
   <main>
-    <!-- HUD Циферблат -->
+    <!-- Циферблат -->
     <div class="hud-container">
       <div class="ring-wrapper">
         <svg>
-          <circle class="track" cx="85" cy="85" r="76"></circle>
-          <circle class="progress" id="progressRing" cx="85" cy="85" r="76"></circle>
+          <circle class="track" cx="78" cy="78" r="70"></circle>
+          <circle class="progress" id="progressRing" cx="78" cy="78" r="70"></circle>
         </svg>
         <div class="timer-display">
           <div class="timer-time" id="timeText">00:00</div>
@@ -549,7 +594,7 @@
       </div>
     </div>
 
-    <!-- Монитор ресурсов CPU / RAM -->
+    <!-- Мониторинг CPU / RAM -->
     <div class="glass-card">
       <div class="telemetry-row">
         <div class="stat-box">
@@ -569,51 +614,70 @@
       </div>
     </div>
 
+    <!-- Переключатель режима времени: Countdown vs Wall-clock -->
+    <div class="time-type-tabs">
+      <div class="time-tab active" id="tabCountdown" onclick="setTimeType('countdown')">⏱ ЧЕРЕЗ ВРЕМЯ</div>
+      <div class="time-tab" id="tabAtTime" onclick="setTimeType('at_time')">🕒 В ТОЧНОЕ ВРЕМЯ</div>
+    </div>
+
     <!-- Ввод времени -->
     <div class="glass-card">
-      <div class="time-inputs">
+      <div class="time-inputs" id="countdownInputs">
         <div class="input-group">
-          <span class="input-label" id="lblH">ЧАСЫ</span>
+          <span class="input-label">ЧАСЫ</span>
           <input type="number" class="time-val" id="inpH" value="0" min="0" max="23">
         </div>
         <div class="input-group">
-          <span class="input-label" id="lblM">МИНУТЫ</span>
+          <span class="input-label">МИНУТЫ</span>
           <input type="number" class="time-val" id="inpM" value="30" min="0" max="59">
+        </div>
+      </div>
+
+      <div class="time-inputs" id="atTimeInputs" style="display:none;">
+        <div class="input-group">
+          <span class="input-label">ТОЧНОЕ ВРЕМЯ ВЫКЛЮЧЕНИЯ (ЧЧ:ММ)</span>
+          <input type="time" class="time-val" id="inpAtTime" value="23:30" style="font-size:16px;">
         </div>
       </div>
     </div>
 
-    <!-- Пресеты -->
-    <div class="preset-grid">
+    <!-- Быстрые пресеты -->
+    <div class="preset-grid" id="presetRow">
       <div class="preset-pill" onclick="playClick(); setQuick(0, 15)">⚡ 15м</div>
       <div class="preset-pill" onclick="playClick(); setQuick(0, 30)">🎮 30м</div>
       <div class="preset-pill" onclick="playClick(); setQuick(1, 30)">🌙 1.5ч</div>
       <div class="preset-pill" onclick="playClick(); setQuick(2, 0)">🚀 2ч</div>
     </div>
 
-    <!-- Умный Защитник -->
-    <div class="glass-card guard-box">
-      <span class="guard-header">🛡️ УМНАЯ ЗАЩИТА (SMART GUARD)</span>
+    <!-- Smart Guard + Keep Awake -->
+    <div class="glass-card">
+      <div class="guard-header-row">
+        <span class="guard-header">🛡️ SMART GUARD</span>
+        <div class="caffeine-toggle" id="caffeineBtn" onclick="toggleKeepAwake()">
+          <span>☕</span><span id="caffeineText">KEEP-AWAKE: OFF</span>
+        </div>
+      </div>
+
       <select class="guard-select" id="guardSelect" onchange="playClick(); onGuardSelectChange();">
-        <option value="normal">⏱ Обычный таймер</option>
-        <option value="cpu_idle">🎬 По окончанию рендера (CPU < 10%)</option>
+        <option value="normal">⏱ Обычный таймер (по времени)</option>
+        <option value="cpu_idle">🎬 По завершению рендера (CPU < 10%)</option>
         <option value="process_guard">🎮 Process Guard (закрытие .exe)</option>
         <option value="network_guard">📡 Network Guard (конец скачивания)</option>
       </select>
 
       <div class="guard-sub-row" id="procGuardRow" style="display: none;">
         <select class="guard-select" id="procSelect" style="flex:1;"></select>
-        <button class="win-btn" title="Обновить список процессов" onclick="loadProcesses()">🔄</button>
+        <button class="win-btn" title="Обновить процессы" onclick="loadProcesses()">🔄</button>
       </div>
 
       <div class="guard-sub-row" id="netGuardRow" style="display: none;">
-        <span style="font-size:10px; color:var(--muted);">Порог скорости:</span>
-        <input type="number" id="netThreshold" value="100" class="time-val" style="width: 70px; font-size:14px; padding:2px 0;">
-        <span style="font-size:10px; color:var(--muted);">КБ/с</span>
+        <span style="font-size:9px; color:var(--muted);">Порог скорости:</span>
+        <input type="number" id="netThreshold" value="100" class="time-val" style="width: 60px; font-size:12px; padding:1px 0;">
+        <span style="font-size:9px; color:var(--muted);">КБ/с</span>
       </div>
     </div>
 
-    <!-- Режимы -->
+    <!-- 5 Режимов Действия -->
     <div class="mode-grid">
       <button class="mode-btn active" id="m_shutdown" onclick="playClick(); selectMode('shutdown')">
         <span>⏻</span><span>ВЫКЛ</span>
@@ -627,53 +691,79 @@
       <button class="mode-btn" id="m_lock" onclick="playClick(); selectMode('lock')">
         <span>🔒</span><span>БЛОК</span>
       </button>
+      <button class="mode-btn" id="m_monitor" onclick="playClick(); selectMode('monitor')">
+        <span>🖥️</span><span>ЭКРАН</span>
+      </button>
     </div>
 
-    <!-- Snooze -->
+    <!-- Кнопки Snooze -->
     <div class="snooze-row">
-      <button class="snooze-btn" id="snz1" disabled onclick="playClick(); addTime(5)">+5 МИН</button>
-      <button class="snooze-btn" id="snz2" disabled onclick="playClick(); addTime(10)">+10 МИН</button>
-      <button class="snooze-btn" id="snz3" disabled onclick="playClick(); addTime(15)">+15 МИН</button>
+      <button class="snooze-btn" id="snz1" disabled onclick="playClick(); snooze(5)">+5 МИН</button>
+      <button class="snooze-btn" id="snz2" disabled onclick="playClick(); snooze(10)">+10 МИН</button>
+      <button class="snooze-btn" id="snz3" disabled onclick="playClick(); snooze(15)">+15 МИН</button>
     </div>
 
-    <!-- Кнопка действия -->
+    <!-- Главная кнопка действия -->
     <button class="action-btn" id="actionBtn" onclick="playClick(); toggleTimer()">▶ ЗАПУСТИТЬ ТАЙМЕР</button>
   </main>
 
   <script>
-    // Web Audio Synthesizer (Sci-Fi Audio Clicks)
+    // Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let isMuted = false;
+    let isKeepAwake = false;
+    let timeType = 'countdown'; // 'countdown' | 'at_time'
+    let mode = 'shutdown';
+    let isRunning = false;
+
+    const ring = document.getElementById('progressRing');
+    const circumference = 2 * Math.PI * 70; // ~439.8
+
+    const colors = {
+      shutdown: { main: '#ff453a', glow: 'rgba(255, 69, 58, 0.35)' },
+      sleep:    { main: '#bf5af2', glow: 'rgba(191, 90, 242, 0.35)' },
+      restart:  { main: '#00f2fe', glow: 'rgba(0, 242, 254, 0.35)' },
+      lock:     { main: '#ffd60a', glow: 'rgba(255, 214, 10, 0.35)' },
+      monitor:  { main: '#30d158', glow: 'rgba(48, 209, 88, 0.35)' }
+    };
 
     function playClick() {
       if (isMuted) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.05);
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch(e) {
+        console.error("Audio error:", e);
+      }
     }
 
     function playBeep(freq = 600) {
       if (isMuted) return;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.15);
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch(e) {
+        console.error("Beep error:", e);
+      }
     }
 
     function toggleMute() {
@@ -684,50 +774,46 @@
       }
     }
 
-    function showToast(msg) {
+    function showToast(msg, isSuccess = false) {
       const t = document.getElementById('toast');
       t.innerText = msg;
-      t.classList.add('show');
+      t.className = 'toast-banner' + (isSuccess ? ' success' : '') + ' show';
       setTimeout(() => t.classList.remove('show'), 3500);
     }
 
-    let mode = 'shutdown';
-    let isRunning = false;
-    let totalSecs = 0;
-    let remSecs = 0;
-    let timerInterval = null;
+    function toggleKeepAwake() {
+      isKeepAwake = !isKeepAwake;
+      const btn = document.getElementById('caffeineBtn');
+      const txt = document.getElementById('caffeineText');
+      if (isKeepAwake) {
+        btn.classList.add('active');
+        txt.innerText = 'KEEP-AWAKE: ON';
+        showToast('Режим Caffeine активен (ПК не уснёт)', true);
+      } else {
+        btn.classList.remove('active');
+        txt.innerText = 'KEEP-AWAKE: OFF';
+      }
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.set_keep_awake(isKeepAwake);
+      }
+    }
 
-    const ring = document.getElementById('progressRing');
-    const circumference = 2 * Math.PI * 76; // ~477.5
-
-    // Drag Window
-    let isDragging = false, startX = 0, startY = 0;
-    document.getElementById('headerBar').addEventListener('mousedown', (e) => {
-      if (e.target.classList.contains('win-btn')) return;
-      isDragging = true; startX = e.screenX; startY = e.screenY;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      const dx = e.screenX - startX;
-      const dy = e.screenY - startY;
-      startX = e.screenX; startY = e.screenY;
-      if (window.pywebview) pywebview.api.move_window(dx, dy);
-    });
-    window.addEventListener('mouseup', () => isDragging = false);
-
-    const colors = {
-      shutdown: { main: '#ff453a', glow: 'rgba(255, 69, 58, 0.35)' },
-      sleep:    { main: '#bf5af2', glow: 'rgba(191, 90, 242, 0.35)' },
-      restart:  { main: '#00f2fe', glow: 'rgba(0, 242, 254, 0.35)' },
-      lock:     { main: '#ffd60a', glow: 'rgba(255, 214, 10, 0.35)' }
-    };
+    function setTimeType(type) {
+      if (isRunning) return;
+      timeType = type;
+      document.getElementById('tabCountdown').classList.toggle('active', type === 'countdown');
+      document.getElementById('tabAtTime').classList.toggle('active', type === 'at_time');
+      document.getElementById('countdownInputs').style.display = (type === 'countdown') ? 'flex' : 'none';
+      document.getElementById('presetRow').style.display = (type === 'countdown') ? 'grid' : 'none';
+      document.getElementById('atTimeInputs').style.display = (type === 'at_time') ? 'flex' : 'none';
+      updatePreview();
+    }
 
     function selectMode(m) {
       mode = m;
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('m_' + m).classList.add('active');
-      
+
       const col = colors[m];
       document.documentElement.style.setProperty('--accent', col.main);
       document.documentElement.style.setProperty('--accent-glow', col.glow);
@@ -741,7 +827,7 @@
       updatePreview();
     }
 
-    function calculateTotalSecs() {
+    function calculateCountdownSecs() {
       const h = parseInt(document.getElementById('inpH').value || 0);
       const m = parseInt(document.getElementById('inpM').value || 0);
       return h * 3600 + m * 60;
@@ -749,28 +835,32 @@
 
     function updatePreview() {
       if (isRunning) return;
-      const secs = calculateTotalSecs();
-      const h = Math.floor(secs / 3600);
-      const m = Math.floor((secs % 3600) / 60);
-      document.getElementById('timeText').innerText = 
-        String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-      
-      const names = { shutdown: 'ВЫКЛЮЧЕНИЕ', sleep: 'СОН', restart: 'ПЕРЕЗАГРУЗКА', lock: 'БЛОКИРОВКА' };
-      document.getElementById('subText').innerText = names[mode] + ' READY';
+      const names = { shutdown: 'ВЫКЛЮЧЕНИЕ', sleep: 'СОН', restart: 'СБРОС', lock: 'БЛОК', monitor: 'ЭКРАН' };
+
+      if (timeType === 'countdown') {
+        const secs = calculateCountdownSecs();
+        const h = Math.floor(secs / 3600);
+        const m = Math.floor((secs % 3600) / 60);
+        document.getElementById('timeText').innerText =
+          String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        document.getElementById('subText').innerText = names[mode] + ' READY';
+      } else {
+        const atVal = document.getElementById('inpAtTime').value || '00:00';
+        document.getElementById('timeText').innerText = atVal;
+        document.getElementById('subText').innerText = names[mode] + ' В ' + atVal;
+      }
       ring.style.strokeDashoffset = circumference;
     }
 
     document.getElementById('inpH').addEventListener('input', updatePreview);
     document.getElementById('inpM').addEventListener('input', updatePreview);
+    document.getElementById('inpAtTime').addEventListener('input', updatePreview);
 
     function onGuardSelectChange() {
       const val = document.getElementById('guardSelect').value;
       document.getElementById('procGuardRow').style.display = (val === 'process_guard') ? 'flex' : 'none';
       document.getElementById('netGuardRow').style.display = (val === 'network_guard') ? 'flex' : 'none';
-
-      if (val === 'process_guard') {
-        loadProcesses();
-      }
+      if (val === 'process_guard') loadProcesses();
     }
 
     async function loadProcesses() {
@@ -779,7 +869,7 @@
           const procs = await window.pywebview.api.get_running_processes();
           const sel = document.getElementById('procSelect');
           sel.innerHTML = '';
-          if (procs.length === 0) {
+          if (!procs || procs.length === 0) {
             sel.innerHTML = '<option value="">(Процессы не найдены)</option>';
           } else {
             procs.forEach(p => {
@@ -790,7 +880,8 @@
             });
           }
         } catch(e) {
-          console.error(e);
+          console.error("loadProcesses error:", e);
+          showToast("Ошибка получения списка процессов");
         }
       }
     }
@@ -801,99 +892,157 @@
     }
 
     async function startTimer() {
-      const secs = calculateTotalSecs();
       const guard = document.getElementById('guardSelect').value;
 
-      if (secs <= 0 && guard === 'normal') {
-        showToast('Укажите время работы таймера!');
+      if (!window.pywebview || !window.pywebview.api) {
+        showToast("Подключение к ядру системы...");
         return;
       }
-      
-      let guardParam = null;
-      if (guard === 'process_guard') {
-        guardParam = document.getElementById('procSelect').value;
-        if (!guardParam) {
-          showToast('Выберите процесс для мониторинга!');
-          return;
+
+      let res;
+      if (guard === 'normal') {
+        let secs = 0;
+        let atTimeStr = "";
+        if (timeType === 'countdown') {
+          secs = calculateCountdownSecs();
+          if (secs <= 0) {
+            showToast("Укажите время работы таймера!");
+            return;
+          }
+        } else {
+          atTimeStr = document.getElementById('inpAtTime').value;
+          if (!atTimeStr) {
+            showToast("Укажите целевое время!");
+            return;
+          }
         }
-      } else if (guard === 'network_guard') {
-        guardParam = document.getElementById('netThreshold').value || 100;
+
+        res = await window.pywebview.api.start_timer(mode, secs, timeType, atTimeStr, isKeepAwake);
+      } else {
+        let guardParam = null;
+        if (guard === 'process_guard') {
+          guardParam = document.getElementById('procSelect').value;
+          if (!guardParam) {
+            showToast("Выберите процесс для мониторинга!");
+            return;
+          }
+        } else if (guard === 'network_guard') {
+          guardParam = document.getElementById('netThreshold').value || 100;
+        }
+        res = await window.pywebview.api.start_guard(mode, guard, guardParam, isKeepAwake);
       }
 
-      totalSecs = remSecs = (secs > 0 ? secs : 3600);
-      isRunning = true;
-
-      document.getElementById('actionBtn').innerText = '✕ ОТМЕНИТЬ ТАЙМЕР';
-      document.getElementById('actionBtn').classList.add('running');
-      document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = false);
-
-      if (window.pywebview && window.pywebview.api) {
-        const res = await window.pywebview.api.launch_action(mode, totalSecs, guard, guardParam);
-        if (res && res.success === false) {
-          showToast(res.error || 'Ошибка запуска таймера');
-          cancelTimer();
-          return;
-        }
+      if (res && res.success) {
+        setUIRunning(true);
+        showToast("Таймер успешно активирован!", true);
+      } else {
+        showToast((res && res.error) ? res.error : "Ошибка запуска таймера");
       }
-
-      timerInterval = setInterval(() => {
-        remSecs--;
-        
-        // Show Fullscreen Warning Overlay at 60s
-        if (remSecs === 60) {
-          document.getElementById('warnOverlay').classList.add('active');
-        }
-        if (remSecs <= 60 && remSecs > 0) {
-          document.getElementById('warnSecs').innerText = remSecs;
-        }
-
-        // Countdown audio alert for last 10s
-        if (remSecs <= 10 && remSecs > 0) {
-          playBeep(400 + (11 - remSecs) * 40);
-        }
-
-        if (remSecs <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('warnOverlay').classList.remove('active');
-          if (window.pywebview) window.pywebview.api.execute_action(mode);
-          cancelTimer();
-          return;
-        }
-
-        const h = Math.floor(remSecs / 3600);
-        const m = Math.floor((remSecs % 3600) / 60);
-        document.getElementById('timeText').innerText = 
-          String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-        document.getElementById('subText').innerText = 'ОСТАЛОСЬ ' + remSecs + ' СЕК';
-
-        const offset = circumference - (remSecs / totalSecs) * circumference;
-        ring.style.strokeDashoffset = offset;
-      }, 1000);
     }
 
-    function cancelTimer() {
-      isRunning = false;
-      clearInterval(timerInterval);
-      document.getElementById('warnOverlay').classList.remove('active');
-      document.getElementById('actionBtn').innerText = '▶ ЗАПУСТИТЬ ТАЙМЕР';
-      document.getElementById('actionBtn').classList.remove('running');
-      document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = true);
-
+    async function cancelTimer() {
       if (window.pywebview && window.pywebview.api) {
-        window.pywebview.api.cancel_action();
+        try {
+          await window.pywebview.api.cancel_timer();
+        } catch(e) {
+          console.error("Cancel timer error:", e);
+        }
       }
+      setUIRunning(false);
       updatePreview();
     }
 
-    function addTime(mins) {
-      if (isRunning) {
-        remSecs += mins * 60;
-        totalSecs += mins * 60;
+    async function snooze(mins) {
+      if (!isRunning) return;
+      if (window.pywebview && window.pywebview.api) {
+        try {
+          const res = await window.pywebview.api.snooze(mins);
+          if (res && res.success) {
+            showToast(`Добавлено +${mins} мин!`, true);
+            document.getElementById('warnOverlay').classList.remove('active');
+          }
+        } catch(e) {
+          console.error("Snooze error:", e);
+        }
+      }
+    }
+
+    function setUIRunning(running) {
+      isRunning = running;
+      const btn = document.getElementById('actionBtn');
+      if (running) {
+        btn.innerText = '✕ ОТМЕНИТЬ ТАЙМЕР';
+        btn.classList.add('running');
+        document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = false);
+      } else {
+        btn.innerText = '▶ ЗАПУСТИТЬ ТАЙМЕР';
+        btn.classList.remove('running');
+        document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = true);
         document.getElementById('warnOverlay').classList.remove('active');
       }
     }
 
-    // Hotkeys (Space for Start/Pause, Esc for Cancel)
+    // State Polling loop (Python Single Source of Truth)
+    setInterval(async () => {
+      if (window.pywebview && window.pywebview.api) {
+        try {
+          const state = await window.pywebview.api.get_timer_state();
+          if (state.is_active) {
+            if (!isRunning) setUIRunning(true);
+
+            const rem = state.rem_secs;
+            const tot = state.total_secs;
+
+            // Warning Overlay
+            if (state.warning_active) {
+              document.getElementById('warnOverlay').classList.add('active');
+              document.getElementById('warnSecs').innerText = rem;
+              if (rem <= 10 && rem > 0) playBeep(400 + (11 - rem) * 45);
+            } else {
+              document.getElementById('warnOverlay').classList.remove('active');
+            }
+
+            const h = Math.floor(rem / 3600);
+            const m = Math.floor((rem % 3600) / 60);
+            document.getElementById('timeText').innerText =
+              String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+            document.getElementById('subText').innerText = 'ОСТАЛОСЬ ' + rem + ' СЕК';
+
+            const offset = circumference - (rem / tot) * circumference;
+            ring.style.strokeDashoffset = Math.max(0, offset);
+          } else if (state.guard_active) {
+            if (!isRunning) setUIRunning(true);
+            document.getElementById('timeText').innerText = "GUARD";
+            document.getElementById('subText').innerText = "ЗАЩИТА АКТИВНА";
+            ring.style.strokeDashoffset = 0;
+          } else {
+            if (isRunning) {
+              setUIRunning(false);
+              updatePreview();
+            }
+          }
+        } catch(e) {
+          console.error("Polling error:", e);
+        }
+      }
+    }, 500);
+
+    // Telemetry Polling (CPU/RAM)
+    setInterval(async () => {
+      if (window.pywebview && window.pywebview.api) {
+        try {
+          const stats = await window.pywebview.api.get_system_stats();
+          document.getElementById('cpuVal').innerText = stats.cpu + '%';
+          document.getElementById('cpuBar').style.width = stats.cpu + '%';
+          document.getElementById('ramVal').innerText = stats.ram + '%';
+          document.getElementById('ramBar').style.width = stats.ram + '%';
+        } catch(e) {
+          console.error("Telemetry error:", e);
+        }
+      }
+    }, 2000);
+
+    // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
       if (activeTag === 'input' || activeTag === 'select') return;
@@ -909,50 +1058,39 @@
       }
     });
 
-    // Scroll & Typing input validation
-    document.querySelectorAll('.time-val').forEach(input => {
-      input.addEventListener('input', () => {
-        let max = input.id === 'inpH' ? 23 : 59;
-        let val = parseInt(input.value);
-        if (isNaN(val) || val < 0) input.value = 0;
-        else if (val > max) input.value = max;
-        updatePreview();
-      });
-
-      input.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        if (isRunning) return;
-        let val = parseInt(input.value || 0) + (e.deltaY < 0 ? 1 : -1);
-        const max = input.id === 'inpH' ? 23 : 59;
-        if (val < 0) val = max;
-        if (val > max) val = 0;
-        input.value = val;
-        updatePreview();
-      });
+    // Fallback Window Dragging for headers
+    let isDragging = false, startX = 0, startY = 0;
+    document.getElementById('headerBar').addEventListener('mousedown', (e) => {
+      if (e.target.classList.contains('win-btn')) return;
+      isDragging = true; startX = e.screenX; startY = e.screenY;
     });
 
-    // Initial Load & Telemetry Polling (CPU / RAM)
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.screenX - startX;
+      const dy = e.screenY - startY;
+      startX = e.screenX; startY = e.screenY;
+      if (window.pywebview && window.pywebview.api) {
+        window.pywebview.api.move_window(dx, dy);
+      }
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
+    // Initial Load
     window.addEventListener('DOMContentLoaded', async () => {
       if (window.pywebview && window.pywebview.api) {
         try {
           const muted = await window.pywebview.api.get_sound_muted();
           isMuted = !!muted;
           document.getElementById('soundBtn').innerText = isMuted ? '🔇' : '🔊';
-        } catch(e){}
+
+          const awake = await window.pywebview.api.get_keep_awake();
+          if (awake) toggleKeepAwake();
+        } catch(e) {
+          console.error("Init prefs error:", e);
+        }
       }
     });
-
-    setInterval(async () => {
-      if (window.pywebview && window.pywebview.api) {
-        try {
-          const stats = await window.pywebview.api.get_system_stats();
-          document.getElementById('cpuVal').innerText = stats.cpu + '%';
-          document.getElementById('cpuBar').style.width = stats.cpu + '%';
-          document.getElementById('ramVal').innerText = stats.ram + '%';
-          document.getElementById('ramBar').style.width = stats.ram + '%';
-        } catch(e){}
-      }
-    }, 2000);
 
     updatePreview();
   </script>
