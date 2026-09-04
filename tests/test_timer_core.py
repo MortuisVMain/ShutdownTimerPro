@@ -75,5 +75,15 @@ class TestTimerEngine(unittest.TestCase):
         self.assertFalse(state["is_active"])
         self.assertFalse(state["keep_awake"])
 
+class TestPreferences(unittest.TestCase):
+    def test_prefs_save_and_load(self):
+        from main import load_prefs, save_prefs
+        save_prefs({"hours": 3, "minutes": 15, "mode": "restart", "time_type": "countdown"})
+        prefs = load_prefs()
+        self.assertEqual(prefs["hours"], 3)
+        self.assertEqual(prefs["minutes"], 15)
+        self.assertEqual(prefs["mode"], "restart")
+        self.assertEqual(prefs["time_type"], "countdown")
+
 if __name__ == "__main__":
     unittest.main()

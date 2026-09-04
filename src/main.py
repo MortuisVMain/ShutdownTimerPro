@@ -50,33 +50,41 @@ def log_error(msg):
     logging.error(msg)
     print(f"[ERROR] {msg}")
 
-log_info("--- Запуск ShutdownTimerPro v0.3.0-alpha ---")
+DEFAULT_PREFS = {
+    "x": None,
+    "y": None,
+    "sound_muted": False,
+    "keep_awake": False,
+    "hours": 0,
+    "minutes": 30,
+    "at_time": "23:30",
+    "time_type": "countdown",
+    "mode": "shutdown",
+    "guard": "normal",
+    "guard_param": ""
+}
+
+log_info("--- Запуск ShutdownTimerPro v0.3.1-alpha ---")
 
 def load_prefs():
+    prefs = dict(DEFAULT_PREFS)
     try:
         if os.path.exists(SAVE_FILE):
             with open(SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 if isinstance(data, dict):
-                    return {
-                        "x": data.get("x"),
-                        "y": data.get("y"),
-                        "sound_muted": bool(data.get("sound_muted", False)),
-                        "keep_awake": bool(data.get("keep_awake", False))
-                    }
+                    prefs.update(data)
     except Exception as e:
         log_error(f"Ошибка загрузки настроек: {e}")
-    return {"x": None, "y": None, "sound_muted": False, "keep_awake": False}
+    return prefs
 
-def save_prefs(x, y, sound_muted=False, keep_awake=False):
+def save_prefs(updated_dict: dict):
     try:
+        current = load_prefs()
+        if isinstance(updated_dict, dict):
+            current.update(updated_dict)
         with open(SAVE_FILE, "w", encoding="utf-8") as f:
-            json.dump({
-                "x": x,
-                "y": y,
-                "sound_muted": sound_muted,
-                "keep_awake": keep_awake
-            }, f, ensure_ascii=False, indent=2)
+            json.dump(current, f, ensure_ascii=False, indent=2)
     except Exception as e:
         log_error(f"Ошибка сохранения настроек: {e}")
 
@@ -158,8 +166,16 @@ class CyberAPI:
         return SmartGuardManager.get_running_process_names()
 
     # --- Timer & Action Endpoints ---
-    def start_timer(self, mode: str, secs: int, trigger_type: str = "countdown", target_time_str: str = "", keep_awake: bool = False):
-        log_info(f"API start_timer: mode={mode}, secs={secs}, trigger={trigger_type}, time={target_time_str}, keep_awake={keep_awake}")
+    def start_timer(self, mode: str, secs: int, trigger_type: str = "countdown", target_time_str: str = "", keep_awake: bool = False, hours: int = 0, minutes: int = 0):
+        log_info(f"API start_timer: mode={mode}, secs={secs}, trigger={trigger_type}, time={target_time_str}, keep_awake={keep_awake}, h={hours}, m={minutes}")
+        save_prefs({
+            "mode": mode,
+            "time_type": trigger_type,
+            "at_time": target_time_str,
+            "hours": hours,
+            "minutes": minutes,
+            "keep_awake": keep_awake
+        })
         self.guard_manager.stop()
         res = self.timer_engine.start(mode, secs, trigger_type, target_time_str, keep_awake)
         if self._tray_icon and res.get("success"):
@@ -168,6 +184,12 @@ class CyberAPI:
 
     def start_guard(self, mode: str, guard_type: str, guard_param=None, keep_awake: bool = False):
         log_info(f"API start_guard: mode={mode}, guard={guard_type}, param={guard_param}, keep_awake={keep_awake}")
+        save_prefs({
+            "mode": mode,
+            "guard": guard_type,
+            "guard_param": str(guard_param) if guard_param else "",
+            "keep_awake": keep_awake
+        })
         self.timer_engine.cancel()
         if keep_awake:
             PowerManager.set_keep_awake(True)
@@ -214,13 +236,26 @@ class CyberAPI:
         return state
 
     # --- Preferences & Window Controls ---
+    def get_user_prefs(self):
+        return load_prefs()
+
+    def save_user_prefs(self, prefs: dict):
+        if isinstance(prefs, dict):
+            save_prefs(prefs)
+            if "sound_muted" in prefs:
+                self.sound_muted = bool(prefs["sound_muted"])
+            if "keep_awake" in prefs:
+                self.keep_awake = bool(prefs["keep_awake"])
+                PowerManager.set_keep_awake(self.keep_awake)
+            return {"success": True}
+        return {"success": False, "error": "Invalid prefs format"}
+
     def get_sound_muted(self):
         return self.sound_muted
 
     def set_sound_muted(self, muted: bool):
         self.sound_muted = bool(muted)
-        if self._window:
-            save_prefs(self._window.x, self._window.y, self.sound_muted, self.keep_awake)
+        save_prefs({"sound_muted": self.sound_muted})
 
     def get_keep_awake(self):
         return self.keep_awake
@@ -228,15 +263,14 @@ class CyberAPI:
     def set_keep_awake(self, enabled: bool):
         self.keep_awake = bool(enabled)
         PowerManager.set_keep_awake(self.keep_awake)
-        if self._window:
-            save_prefs(self._window.x, self._window.y, self.sound_muted, self.keep_awake)
+        save_prefs({"keep_awake": self.keep_awake})
 
     def move_window(self, dx: int, dy: int):
         if self._window:
             nx = self._window.x + dx
             ny = self._window.y + dy
             self._window.move(nx, ny)
-            save_prefs(nx, ny, self.sound_muted, self.keep_awake)
+            save_prefs({"x": nx, "y": ny})
 
     def minimize(self):
         if self._window:
@@ -253,7 +287,7 @@ class CyberAPI:
 
     def close(self):
         if self._window:
-            save_prefs(self._window.x, self._window.y, self.sound_muted, self.keep_awake)
+            save_prefs({"x": self._window.x, "y": self._window.y})
             self._window.destroy()
 
     def cleanup_and_exit(self):
@@ -304,10 +338,10 @@ def main():
     url = f"file:///{HTML_FILE.replace('\\', '/')}"
 
     kwargs = {
-        "title": "ПК Таймер Ultra Pro HUD",
+        "title": "ShutdownTimerPro v0.3.1-alpha",
         "url": url,
         "width": 430,
-        "height": 800,
+        "height": 790,
         "frameless": True,
         "transparent": False,
         "on_top": True,
