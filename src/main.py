@@ -1,5 +1,5 @@
 import webview
-import os, sys, json, threading, ctypes, logging
+import os, sys, json, threading, time, ctypes, logging
 import psutil
 from PIL import Image
 import pystray
@@ -16,7 +16,7 @@ from core.timer import TimerEngine
 
 # Windows Taskbar App ID
 try:
-    myappid = "cyberhud.pctimer.app.0.2"
+    myappid = "cyberhud.pctimer.app.0.3"
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 except Exception as e:
     logging.warning(f"Could not set AppUserModelID: {e}")
@@ -50,7 +50,7 @@ def log_error(msg):
     logging.error(msg)
     print(f"[ERROR] {msg}")
 
-log_info("--- Запуск ShutdownTimerPro v0.2.0-alpha ---")
+log_info("--- Запуск ShutdownTimerPro v0.3.0-alpha ---")
 
 def load_prefs():
     try:
@@ -80,6 +80,42 @@ def save_prefs(x, y, sound_muted=False, keep_awake=False):
     except Exception as e:
         log_error(f"Ошибка сохранения настроек: {e}")
 
+class TelemetrySampler:
+    """Dedicated background sampler ensuring accurate, non-zero CPU and RAM metrics."""
+    def __init__(self):
+        self.cpu = 0.0
+        self.ram = 0.0
+        self._stop_event = threading.Event()
+        self._thread = threading.Thread(target=self._sample_loop, daemon=True, name="TelemetrySamplerThread")
+
+    def start(self):
+        try:
+            psutil.cpu_percent(interval=None) # prime
+        except Exception as e:
+            log_error(f"Prime cpu_percent failed: {e}")
+        self._thread.start()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def _sample_loop(self):
+        while not self._stop_event.is_set():
+            try:
+                c = psutil.cpu_percent(interval=1.0)
+                r = psutil.virtual_memory().percent
+                self.cpu = c
+                self.ram = r
+            except Exception as e:
+                log_error(f"TelemetrySampler error: {e}")
+                time.sleep(1.0)
+
+    def get_stats(self):
+        cpu_val = max(1, int(round(self.cpu))) if self.cpu > 0.4 else int(round(self.cpu))
+        return {
+            "cpu": cpu_val,
+            "ram": int(round(self.ram))
+        }
+
 class CyberAPI:
     def __init__(self):
         self._window = None
@@ -91,9 +127,11 @@ class CyberAPI:
         self.sound_muted = prefs.get("sound_muted", False)
         self.keep_awake = prefs.get("keep_awake", False)
 
-        # Initialize core managers
+        # Initialize core managers & telemetry
         self.timer_engine = TimerEngine()
         self.guard_manager = SmartGuardManager(on_trigger_action=self.on_guard_triggered)
+        self.telemetry = TelemetrySampler()
+        self.telemetry.start()
 
     def set_window(self, window):
         self._window = window
@@ -112,16 +150,9 @@ class CyberAPI:
         if self._tray_icon:
             self._tray_icon.title = "ShutdownTimerPro | Готов"
 
-    # --- System Telemetry & Process Info ---
+    # --- Live System Telemetry & Process Info ---
     def get_system_stats(self):
-        try:
-            return {
-                "cpu": int(psutil.cpu_percent(interval=None)),
-                "ram": int(psutil.virtual_memory().percent)
-            }
-        except Exception as e:
-            log_error(f"Ошибка получения метрик системы: {e}")
-            return {"cpu": 0, "ram": 0}
+        return self.telemetry.get_stats()
 
     def get_running_processes(self):
         return SmartGuardManager.get_running_process_names()
@@ -228,6 +259,7 @@ class CyberAPI:
     def cleanup_and_exit(self):
         log_info("Завершение работы ShutdownTimerPro...")
         self.cancel_timer()
+        self.telemetry.stop()
         PowerManager.set_keep_awake(False)
         if self._tray_icon:
             try:
@@ -274,8 +306,8 @@ def main():
     kwargs = {
         "title": "ПК Таймер Ultra Pro HUD",
         "url": url,
-        "width": 420,
-        "height": 790,
+        "width": 430,
+        "height": 800,
         "frameless": True,
         "transparent": False,
         "on_top": True,

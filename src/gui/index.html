@@ -3,25 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ПК Таймер Ultra Pro HUD 2.0</title>
+  <title>ShutdownTimerPro — Obsidian Cyber HUD</title>
   <link rel="icon" type="image/png" href="app_icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #07090e;
-      --card-bg: rgba(15, 21, 34, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(13, 17, 27, 0.7);
+      --card-border: rgba(255, 255, 255, 0.07);
+      --card-border-hover: rgba(255, 255, 255, 0.15);
       --text: #f8fafc;
-      --muted: #64748b;
+      --text-dim: #94a3b8;
+      --muted: #475569;
+      
       --accent: #00f2fe;
-      --accent-glow: rgba(0, 242, 254, 0.35);
-      --danger: #ff453a;
-      --danger-glow: rgba(255, 69, 58, 0.4);
-      --warning: #ff9f0a;
+      --accent-glow: rgba(0, 242, 254, 0.28);
+      --accent-dim: rgba(0, 242, 254, 0.12);
+
+      --danger: #ff3b30;
+      --danger-glow: rgba(255, 59, 48, 0.3);
+      --danger-dim: rgba(255, 59, 48, 0.12);
+
+      --purple: #af52de;
+      --purple-glow: rgba(175, 82, 222, 0.3);
+
       --green: #30d158;
-      --purple: #bf5af2;
+      --green-glow: rgba(48, 209, 88, 0.3);
+
+      --yellow: #ffd60a;
+      --yellow-glow: rgba(255, 214, 10, 0.3);
     }
 
     * {
@@ -29,11 +41,14 @@
       margin: 0;
       padding: 0;
       user-select: none;
-      font-family: 'Outfit', 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Segoe UI Variable', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
     body {
       background: var(--bg);
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 24px 24px;
       color: var(--text);
       width: 100vw;
       height: 100vh;
@@ -41,452 +56,554 @@
       display: flex;
       flex-direction: column;
       border: 1px solid var(--card-border);
-      border-radius: 16px;
+      border-radius: 18px;
       position: relative;
     }
 
-    .bg-glow {
+    /* Ambient Laser Glow */
+    .ambient-glow {
       position: absolute;
-      width: 360px;
-      height: 360px;
-      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 75%);
-      top: -130px;
+      width: 420px;
+      height: 380px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, rgba(7, 9, 14, 0) 70%);
+      top: -160px;
       left: 50%;
       transform: translateX(-50%);
       pointer-events: none;
       z-index: 0;
-      transition: background 0.4s ease;
+      transition: background 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* Header Bar */
     header {
       height: 48px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
-      background: rgba(11, 15, 25, 0.88);
-      backdrop-filter: blur(25px);
+      background: rgba(10, 14, 23, 0.85);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--card-border);
       z-index: 10;
       -webkit-app-region: drag;
       cursor: move;
     }
 
-    .title-box {
+    .brand-container {
       display: flex;
       align-items: center;
       gap: 10px;
     }
 
-    .led-dot {
-      width: 10px;
-      height: 10px;
+    .status-orb {
+      position: relative;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
+      box-shadow: 0 0 10px var(--accent);
       transition: all 0.3s ease;
     }
 
-    .title-text {
-      font-family: 'JetBrains Mono', Consolas, monospace;
+    .status-orb::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 1px solid var(--accent);
+      opacity: 0.4;
+      animation: pulse 2.4s infinite cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    .brand-title {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      color: var(--text);
+    }
+
+    .brand-ver {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--text-dim);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 5px;
+      letter-spacing: 0.5px;
     }
 
     .window-controls {
       display: flex;
+      align-items: center;
       gap: 6px;
       -webkit-app-region: no-drag;
     }
 
-    .win-btn {
+    .btn-icon {
       width: 28px;
       height: 28px;
       border-radius: 8px;
-      border: none;
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--muted);
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-dim);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .win-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
+    .btn-icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--card-border-hover);
       color: var(--text);
     }
 
-    .win-btn.close:hover {
+    .btn-icon.close:hover {
       background: var(--danger);
+      border-color: var(--danger);
       color: #fff;
     }
 
+    /* Main Container */
     main {
       flex: 1;
-      padding: 12px 18px;
+      padding: 14px 18px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       z-index: 1;
-      backdrop-filter: blur(30px);
+      backdrop-filter: blur(25px);
       overflow-y: auto;
     }
 
-    .glass-card {
+    /* Cards */
+    .obsidian-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 9px 12px;
+      border-radius: 14px;
+      padding: 10px 14px;
       backdrop-filter: blur(20px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      transition: border-color 0.2s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
-    .glass-card:hover {
-      border-color: rgba(255, 255, 255, 0.15);
+    .obsidian-card:hover {
+      border-color: var(--card-border-hover);
     }
 
-    /* HUD Ring */
-    .hud-container {
+    /* Hero Chrono Gauge */
+    .chrono-container {
       display: flex;
       justify-content: center;
       position: relative;
       padding: 2px 0;
     }
 
-    .ring-wrapper {
+    .chrono-wrapper {
       position: relative;
-      width: 156px;
-      height: 156px;
+      width: 168px;
+      height: 168px;
     }
 
-    svg {
+    .chrono-svg {
       transform: rotate(-90deg);
-      width: 156px;
-      height: 156px;
+      width: 168px;
+      height: 168px;
     }
 
-    circle {
+    .gauge-track {
       fill: none;
-      stroke-width: 8;
+      stroke: rgba(255, 255, 255, 0.04);
+      stroke-width: 7;
     }
 
-    .track { stroke: rgba(255, 255, 255, 0.05); }
+    .gauge-ticks {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.12);
+      stroke-width: 1.5;
+      stroke-dasharray: 2 6.8;
+    }
 
-    .progress {
+    .gauge-progress {
+      fill: none;
       stroke: var(--accent);
+      stroke-width: 7;
       stroke-linecap: round;
-      stroke-dasharray: 440;
-      stroke-dashoffset: 440;
-      transition: stroke-dashoffset 0.4s ease, stroke 0.3s ease;
+      stroke-dasharray: 452;
+      stroke-dashoffset: 452;
+      transition: stroke-dashoffset 0.4s ease, stroke 0.4s ease;
       filter: drop-shadow(0 0 10px var(--accent-glow));
     }
 
-    .timer-display {
+    .chrono-face {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
     }
 
-    .timer-time {
-      font-family: 'JetBrains Mono', Consolas, monospace;
+    .chrono-digits {
+      font-family: 'JetBrains Mono', monospace;
       font-size: 32px;
       font-weight: 800;
-      letter-spacing: -1px;
-      text-shadow: 0 0 15px var(--accent-glow);
+      letter-spacing: -1.2px;
+      color: var(--text);
+      text-shadow: 0 0 20px var(--accent-glow);
     }
 
-    .timer-sub {
-      font-size: 9px;
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5px;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
       color: var(--accent);
       text-transform: uppercase;
-      margin-top: 1px;
+      box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Телеметрия */
-    .telemetry-row {
-      display: flex;
-      gap: 8px;
+    .status-badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
     }
 
-    .stat-box {
-      flex: 1;
-      background: rgba(0,0,0,0.35);
-      padding: 5px 8px;
-      border-radius: 8px;
+    /* Live Telemetry Bar */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .telemetry-cell {
+      background: rgba(0, 0, 0, 0.45);
       border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 6px 10px;
     }
 
-    .stat-header {
+    .cell-header {
       display: flex;
       justify-content: space-between;
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--muted);
-      margin-bottom: 3px;
+      align-items: baseline;
+      margin-bottom: 5px;
     }
 
-    .stat-bar-bg {
+    .cell-title {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+    }
+
+    .cell-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .bar-track {
       height: 4px;
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 2px;
       overflow: hidden;
     }
 
-    .stat-bar-fill {
+    .bar-fill {
       height: 100%;
       width: 0%;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-      transition: width 0.4s ease;
+      background: linear-gradient(90deg, var(--accent), #38bdf8);
+      box-shadow: 0 0 10px var(--accent);
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Переключатель режима времени */
-    .time-type-tabs {
+    /* Segmented Tab Control */
+    .segmented-control {
       display: flex;
-      gap: 6px;
-      background: rgba(0,0,0,0.4);
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.5);
       padding: 3px;
-      border-radius: 9px;
+      border-radius: 10px;
       border: 1px solid var(--card-border);
     }
 
-    .time-tab {
+    .segment-tab {
       flex: 1;
-      padding: 5px 0;
+      padding: 6px 0;
       text-align: center;
       font-size: 10px;
-      font-weight: 800;
-      color: var(--muted);
-      border-radius: 7px;
+      font-weight: 700;
+      color: var(--text-dim);
+      border-radius: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .time-tab.active {
-      background: rgba(255,255,255,0.1);
+    .segment-tab.active {
+      background: rgba(255, 255, 255, 0.08);
       color: var(--accent);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
     }
 
-    /* Ввод времени */
-    .time-inputs {
+    /* Time Inputs */
+    .inputs-container {
       display: flex;
-      gap: 8px;
-      align-items: center;
+      gap: 10px;
     }
 
-    .input-group {
+    .time-stepper-box {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
     }
 
-    .input-label {
-      font-size: 8px;
+    .stepper-label {
+      font-size: 8.5px;
       font-weight: 800;
-      color: var(--muted);
-      letter-spacing: 1px;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
     }
 
-    .time-val {
+    .precision-input {
       background: rgba(0, 0, 0, 0.5);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
+      border-radius: 10px;
       color: var(--text);
-      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 20px;
       font-weight: 800;
       text-align: center;
-      padding: 4px 0;
+      padding: 5px 0;
       outline: none;
       transition: all 0.2s ease;
     }
 
-    .time-val:focus {
+    .precision-input:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 10px var(--accent-glow);
+      box-shadow: 0 0 12px var(--accent-glow);
     }
 
-    /* Пресеты */
-    .preset-grid {
+    /* Quick Chips */
+    .quick-chips-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 5px;
+      gap: 6px;
     }
 
-    .preset-pill {
-      background: rgba(255, 255, 255, 0.04);
+    .quick-chip {
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--card-border);
-      border-radius: 7px;
-      padding: 5px 0;
-      color: var(--text);
+      border-radius: 8px;
+      padding: 6px 0;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .quick-chip:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Smart Guard & Caffeine Switch */
+    .guard-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .guard-label {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+    }
+
+    .caffeine-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 3px 8px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
       transition: all 0.2s ease;
     }
 
-    .preset-pill:hover {
+    .caffeine-pill.active {
+      background: rgba(48, 209, 88, 0.12);
+      border-color: var(--green);
+      color: var(--green);
+      box-shadow: 0 0 12px var(--green-glow);
+    }
+
+    .cyber-select {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 9px;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.2s ease;
+    }
+
+    .cyber-select:focus {
+      border-color: var(--accent);
+    }
+
+    .sub-param-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    /* 5 Action Modes Grid */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+
+    .action-mode-card {
+      padding: 8px 0;
+      border: 1px solid var(--card-border);
+      border-radius: 9px;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text-dim);
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .action-mode-card svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .action-mode-card.active {
+      background: var(--accent);
+      color: #05070a;
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    /* Snooze Buttons */
+    .snooze-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .snooze-pill {
+      flex: 1;
+      padding: 7px 0;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .snooze-pill:not(:disabled):hover {
       background: rgba(255, 255, 255, 0.1);
       border-color: var(--accent);
       color: var(--accent);
     }
 
-    /* Смарт Защитник & Keep-Awake */
-    .guard-header-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .guard-header {
-      font-size: 9px;
-      font-weight: 800;
-      color: var(--muted);
-      letter-spacing: 1px;
-    }
-
-    .caffeine-toggle {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 800;
-      color: var(--muted);
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--card-border);
-      transition: all 0.2s ease;
-    }
-
-    .caffeine-toggle.active {
-      background: rgba(48, 209, 88, 0.15);
-      border-color: var(--green);
-      color: var(--green);
-      box-shadow: 0 0 10px rgba(48, 209, 88, 0.3);
-    }
-
-    .guard-select {
-      background: rgba(0,0,0,0.5);
-      border: 1px solid var(--card-border);
-      color: var(--text);
-      font-size: 11px;
-      font-weight: 600;
-      padding: 5px 8px;
-      border-radius: 8px;
-      outline: none;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .guard-sub-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    /* 5 Режимов действия (Включая Дисплей/Монитор) */
-    .mode-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-    }
-
-    .mode-btn {
-      padding: 7px 0;
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      background: rgba(0,0,0,0.3);
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      transition: all 0.2s ease;
-    }
-
-    .mode-btn.active {
-      background: var(--accent);
-      color: #000;
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-
-    /* Snooze */
-    .snooze-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .snooze-btn {
-      flex: 1;
-      padding: 6px 0;
-      border: 1px solid var(--card-border);
-      border-radius: 7px;
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .snooze-btn:not(:disabled):hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: var(--text);
-    }
-
-    .snooze-btn:disabled {
+    .snooze-pill:disabled {
       opacity: 0.25;
       cursor: not-allowed;
     }
 
-    .action-btn {
+    /* Main Launch Button */
+    .launch-btn {
       width: 100%;
-      padding: 12px 0;
+      padding: 13px 0;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       background: var(--accent);
-      color: #000;
+      color: #05070a;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 12px;
       font-weight: 800;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
       cursor: pointer;
-      box-shadow: 0 0 16px var(--accent-glow);
-      transition: all 0.2s ease;
+      box-shadow: 0 0 24px var(--accent-glow);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .action-btn:hover {
+    .launch-btn:hover {
       transform: scale(1.01);
       filter: brightness(1.1);
     }
 
-    .action-btn.running {
+    .launch-btn.running {
       background: var(--danger);
       color: #fff;
-      box-shadow: 0 0 20px var(--danger-glow);
+      box-shadow: 0 0 30px var(--danger-glow);
+      animation: alertPulse 2s infinite;
+    }
+
+    @keyframes alertPulse {
+      0% { box-shadow: 0 0 15px var(--danger-glow); }
+      50% { box-shadow: 0 0 32px var(--danger-glow); }
+      100% { box-shadow: 0 0 15px var(--danger-glow); }
     }
 
     /* Warning Overlay */
-    .warning-overlay {
+    .warning-modal {
       position: absolute;
       inset: 0;
       background: rgba(7, 9, 14, 0.96);
@@ -496,13 +613,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 14px;
+      gap: 16px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
     }
 
-    .warning-overlay.active {
+    .warning-modal.active {
       opacity: 1;
       pointer-events: auto;
     }
@@ -511,200 +628,213 @@
       font-size: 16px;
       font-weight: 900;
       color: var(--danger);
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
     }
 
-    .warning-time {
-      font-family: 'JetBrains Mono', Consolas, monospace;
-      font-size: 46px;
+    .warning-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 48px;
       font-weight: 800;
       color: var(--text);
     }
 
     /* Toast */
-    .toast-banner {
+    .cyber-toast {
       position: absolute;
-      bottom: 16px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: rgba(255, 69, 58, 0.95);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--accent);
       color: #fff;
-      padding: 7px 14px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 9px;
       font-size: 11px;
       font-weight: 700;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       z-index: 120;
       opacity: 0;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: none;
       text-align: center;
-      max-width: 90%;
+      max-width: 88%;
     }
 
-    .toast-banner.show {
+    .cyber-toast.show {
       transform: translateX(-50%) translateY(0);
       opacity: 1;
-    }
-
-    .toast-banner.success {
-      background: rgba(48, 209, 88, 0.95);
     }
   </style>
 </head>
 <body>
 
-  <div class="bg-glow" id="bgGlow"></div>
-  <div class="toast-banner" id="toast"></div>
+  <div class="ambient-glow" id="ambientGlow"></div>
+  <div class="cyber-toast" id="toast"></div>
 
-  <!-- Warning Overlay -->
-  <div class="warning-overlay" id="warnOverlay">
+  <!-- Fullscreen Warning Overlay -->
+  <div class="warning-modal" id="warnOverlay">
     <div class="warning-title">🚨 ВНИМАНИЕ! ЗАВЕРШЕНИЕ РАБОТЫ</div>
-    <div class="warning-time" id="warnSecs">60</div>
-    <div style="display:flex; gap:8px;">
-      <button class="action-btn" style="padding: 8px 16px; font-size:11px;" onclick="snooze(5)">+5 МИНУТ</button>
-      <button class="action-btn running" style="padding: 8px 16px; font-size:11px;" onclick="cancelTimer()">ОТМЕНИТЬ</button>
+    <div class="warning-counter" id="warnSecs">60</div>
+    <div style="display:flex; gap:10px;">
+      <button class="launch-btn" style="padding: 9px 18px; font-size:11px;" onclick="snooze(5)">+5 МИНУТ</button>
+      <button class="launch-btn running" style="padding: 9px 18px; font-size:11px;" onclick="cancelTimer()">ОТМЕНИТЬ</button>
     </div>
   </div>
 
+  <!-- Header -->
   <header id="headerBar">
-    <div class="title-box">
-      <div class="led-dot" id="ledDot"></div>
-      <span class="title-text">CYBER HUD // v0.2.0</span>
+    <div class="brand-container">
+      <div class="status-orb" id="statusOrb"></div>
+      <span class="brand-title">SHUTDOWN TIMER</span>
+      <span class="brand-ver">v0.3.0</span>
     </div>
     <div class="window-controls">
-      <button class="win-btn" id="soundBtn" title="Звук [Mute]" onclick="toggleMute()">🔊</button>
-      <button class="win-btn" onclick="pywebview.api.minimize()">—</button>
-      <button class="win-btn close" onclick="pywebview.api.close()">✕</button>
+      <button class="btn-icon" id="soundBtn" title="Звук [Mute]" onclick="toggleMute()">🔊</button>
+      <button class="btn-icon" onclick="pywebview.api.minimize()" title="Свернуть">—</button>
+      <button class="btn-icon close" onclick="pywebview.api.close()" title="Закрыть">✕</button>
     </div>
   </header>
 
   <main>
-    <!-- Циферблат -->
-    <div class="hud-container">
-      <div class="ring-wrapper">
-        <svg>
-          <circle class="track" cx="78" cy="78" r="70"></circle>
-          <circle class="progress" id="progressRing" cx="78" cy="78" r="70"></circle>
+    <!-- Chrono Hero Gauge -->
+    <div class="chrono-container">
+      <div class="chrono-wrapper">
+        <svg class="chrono-svg">
+          <!-- Background Track -->
+          <circle class="gauge-track" cx="84" cy="84" r="72"></circle>
+          <!-- Minute Ticks -->
+          <circle class="gauge-ticks" cx="84" cy="84" r="72"></circle>
+          <!-- Active Progress -->
+          <circle class="gauge-progress" id="gaugeProgress" cx="84" cy="84" r="72"></circle>
         </svg>
-        <div class="timer-display">
-          <div class="timer-time" id="timeText">00:00</div>
-          <div class="timer-sub" id="subText">READY</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Мониторинг CPU / RAM -->
-    <div class="glass-card">
-      <div class="telemetry-row">
-        <div class="stat-box">
-          <div class="stat-header">
-            <span>CPU</span>
-            <span id="cpuVal">0%</span>
+        <div class="chrono-face">
+          <div class="chrono-digits" id="timeDigits">00:30:00</div>
+          <div class="status-badge" id="statusBadge">
+            <div class="status-badge-dot" id="badgeDot"></div>
+            <span id="badgeText">STANDBY</span>
           </div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" id="cpuBar"></div></div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-header">
-            <span>RAM</span>
-            <span id="ramVal">0%</span>
-          </div>
-          <div class="stat-bar-bg"><div class="stat-bar-fill" id="ramBar"></div></div>
         </div>
       </div>
     </div>
 
-    <!-- Переключатель режима времени: Countdown vs Wall-clock -->
-    <div class="time-type-tabs">
-      <div class="time-tab active" id="tabCountdown" onclick="setTimeType('countdown')">⏱ ЧЕРЕЗ ВРЕМЯ</div>
-      <div class="time-tab" id="tabAtTime" onclick="setTimeType('at_time')">🕒 В ТОЧНОЕ ВРЕМЯ</div>
-    </div>
-
-    <!-- Ввод времени -->
-    <div class="glass-card">
-      <div class="time-inputs" id="countdownInputs">
-        <div class="input-group">
-          <span class="input-label">ЧАСЫ</span>
-          <input type="number" class="time-val" id="inpH" value="0" min="0" max="23">
+    <!-- Live Telemetry Monitor -->
+    <div class="telemetry-grid">
+      <div class="telemetry-cell">
+        <div class="cell-header">
+          <span class="cell-title">CPU LOAD</span>
+          <span class="cell-value" id="cpuText">0%</span>
         </div>
-        <div class="input-group">
-          <span class="input-label">МИНУТЫ</span>
-          <input type="number" class="time-val" id="inpM" value="30" min="0" max="59">
+        <div class="bar-track">
+          <div class="bar-fill" id="cpuBar"></div>
         </div>
       </div>
-
-      <div class="time-inputs" id="atTimeInputs" style="display:none;">
-        <div class="input-group">
-          <span class="input-label">ТОЧНОЕ ВРЕМЯ ВЫКЛЮЧЕНИЯ (ЧЧ:ММ)</span>
-          <input type="time" class="time-val" id="inpAtTime" value="23:30" style="font-size:16px;">
+      <div class="telemetry-cell">
+        <div class="cell-header">
+          <span class="cell-title">RAM USAGE</span>
+          <span class="cell-value" id="ramText">0%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="ramBar" style="background: linear-gradient(90deg, #38bdf8, #818cf8);"></div>
         </div>
       </div>
     </div>
 
-    <!-- Быстрые пресеты -->
-    <div class="preset-grid" id="presetRow">
-      <div class="preset-pill" onclick="playClick(); setQuick(0, 15)">⚡ 15м</div>
-      <div class="preset-pill" onclick="playClick(); setQuick(0, 30)">🎮 30м</div>
-      <div class="preset-pill" onclick="playClick(); setQuick(1, 30)">🌙 1.5ч</div>
-      <div class="preset-pill" onclick="playClick(); setQuick(2, 0)">🚀 2ч</div>
+    <!-- Timing Mode Tabs -->
+    <div class="segmented-control">
+      <div class="segment-tab active" id="tabCountdown" onclick="setTimeType('countdown')">⏱ ТАЙМЕР</div>
+      <div class="segment-tab" id="tabAtTime" onclick="setTimeType('at_time')">🕒 ТОЧНОЕ ВРЕМЯ</div>
     </div>
 
-    <!-- Smart Guard + Keep Awake -->
-    <div class="glass-card">
-      <div class="guard-header-row">
-        <span class="guard-header">🛡️ SMART GUARD</span>
-        <div class="caffeine-toggle" id="caffeineBtn" onclick="toggleKeepAwake()">
-          <span>☕</span><span id="caffeineText">KEEP-AWAKE: OFF</span>
+    <!-- Time Inputs -->
+    <div class="obsidian-card">
+      <div class="inputs-container" id="countdownInputs">
+        <div class="time-stepper-box">
+          <span class="stepper-label">ЧАСЫ</span>
+          <input type="number" class="precision-input" id="inpH" value="0" min="0" max="23">
+        </div>
+        <div class="time-stepper-box">
+          <span class="stepper-label">МИНУТЫ</span>
+          <input type="number" class="precision-input" id="inpM" value="30" min="0" max="59">
         </div>
       </div>
 
-      <select class="guard-select" id="guardSelect" onchange="playClick(); onGuardSelectChange();">
-        <option value="normal">⏱ Обычный таймер (по времени)</option>
+      <div class="inputs-container" id="atTimeInputs" style="display:none;">
+        <div class="time-stepper-box">
+          <span class="stepper-label">ВРЕМЯ СРАБАТЫВАНИЯ (ЧЧ:ММ)</span>
+          <input type="time" class="precision-input" id="inpAtTime" value="23:30" style="font-size:18px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Chips -->
+    <div class="quick-chips-grid" id="quickChips">
+      <div class="quick-chip" onclick="playClick(); setQuick(0, 15)">15M</div>
+      <div class="quick-chip" onclick="playClick(); setQuick(0, 30)">30M</div>
+      <div class="quick-chip" onclick="playClick(); setQuick(1, 0)">1H</div>
+      <div class="quick-chip" onclick="playClick(); setQuick(2, 0)">2H</div>
+    </div>
+
+    <!-- Smart Guard & Caffeine -->
+    <div class="obsidian-card">
+      <div class="guard-card-header">
+        <span class="guard-label">SMART GUARD</span>
+        <div class="caffeine-pill" id="caffeineBtn" onclick="toggleKeepAwake()">
+          <span>☕</span><span id="caffeineText">KEEP-AWAKE</span>
+        </div>
+      </div>
+
+      <select class="cyber-select" id="guardSelect" onchange="playClick(); onGuardSelectChange();">
+        <option value="normal">⏱ Таймер (обычный отсчет)</option>
         <option value="cpu_idle">🎬 По завершению рендера (CPU < 10%)</option>
         <option value="process_guard">🎮 Process Guard (закрытие .exe)</option>
         <option value="network_guard">📡 Network Guard (конец скачивания)</option>
       </select>
 
-      <div class="guard-sub-row" id="procGuardRow" style="display: none;">
-        <select class="guard-select" id="procSelect" style="flex:1;"></select>
-        <button class="win-btn" title="Обновить процессы" onclick="loadProcesses()">🔄</button>
+      <div class="sub-param-row" id="procGuardRow" style="display: none;">
+        <select class="cyber-select" id="procSelect" style="flex:1;"></select>
+        <button class="btn-icon" title="Обновить список процессов" onclick="loadProcesses()">🔄</button>
       </div>
 
-      <div class="guard-sub-row" id="netGuardRow" style="display: none;">
-        <span style="font-size:9px; color:var(--muted);">Порог скорости:</span>
-        <input type="number" id="netThreshold" value="100" class="time-val" style="width: 60px; font-size:12px; padding:1px 0;">
-        <span style="font-size:9px; color:var(--muted);">КБ/с</span>
+      <div class="sub-param-row" id="netGuardRow" style="display: none;">
+        <span style="font-size:9.5px; color:var(--text-dim);">Порог:</span>
+        <input type="number" id="netThreshold" value="100" class="precision-input" style="width: 65px; font-size:12px; padding:2px 0;">
+        <span style="font-size:9.5px; color:var(--text-dim);">КБ/с</span>
       </div>
     </div>
 
-    <!-- 5 Режимов Действия -->
-    <div class="mode-grid">
-      <button class="mode-btn active" id="m_shutdown" onclick="playClick(); selectMode('shutdown')">
-        <span>⏻</span><span>ВЫКЛ</span>
-      </button>
-      <button class="mode-btn" id="m_sleep" onclick="playClick(); selectMode('sleep')">
-        <span>☾</span><span>СОН</span>
-      </button>
-      <button class="mode-btn" id="m_restart" onclick="playClick(); selectMode('restart')">
-        <span>⟳</span><span>СБРОС</span>
-      </button>
-      <button class="mode-btn" id="m_lock" onclick="playClick(); selectMode('lock')">
-        <span>🔒</span><span>БЛОК</span>
-      </button>
-      <button class="mode-btn" id="m_monitor" onclick="playClick(); selectMode('monitor')">
-        <span>🖥️</span><span>ЭКРАН</span>
-      </button>
+    <!-- 5 Action Modes -->
+    <div class="actions-grid">
+      <div class="action-mode-card active" id="m_shutdown" onclick="playClick(); selectMode('shutdown')">
+        <svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0M12 2v10"></path></svg>
+        <span>ВЫКЛ</span>
+      </div>
+      <div class="action-mode-card" id="m_sleep" onclick="playClick(); selectMode('sleep')">
+        <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <span>СОН</span>
+      </div>
+      <div class="action-mode-card" id="m_restart" onclick="playClick(); selectMode('restart')">
+        <svg viewBox="0 0 24 24"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+        <span>СБРОС</span>
+      </div>
+      <div class="action-mode-card" id="m_lock" onclick="playClick(); selectMode('lock')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span>БЛОК</span>
+      </div>
+      <div class="action-mode-card" id="m_monitor" onclick="playClick(); selectMode('monitor')">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span>ЭКРАН</span>
+      </div>
     </div>
 
-    <!-- Кнопки Snooze -->
-    <div class="snooze-row">
-      <button class="snooze-btn" id="snz1" disabled onclick="playClick(); snooze(5)">+5 МИН</button>
-      <button class="snooze-btn" id="snz2" disabled onclick="playClick(); snooze(10)">+10 МИН</button>
-      <button class="snooze-btn" id="snz3" disabled onclick="playClick(); snooze(15)">+15 МИН</button>
+    <!-- Snooze Pills -->
+    <div class="snooze-group">
+      <button class="snooze-pill" id="snz1" disabled onclick="playClick(); snooze(5)">+5 МИН</button>
+      <button class="snooze-pill" id="snz2" disabled onclick="playClick(); snooze(10)">+10 МИН</button>
+      <button class="snooze-pill" id="snz3" disabled onclick="playClick(); snooze(15)">+15 МИН</button>
     </div>
 
-    <!-- Главная кнопка действия -->
-    <button class="action-btn" id="actionBtn" onclick="playClick(); toggleTimer()">▶ ЗАПУСТИТЬ ТАЙМЕР</button>
+    <!-- Launch Action Button -->
+    <button class="launch-btn" id="actionBtn" onclick="playClick(); toggleTimer()">▶ ЗАПУСТИТЬ ТАЙМЕР</button>
   </main>
 
   <script>
@@ -712,19 +842,19 @@
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     let isMuted = false;
     let isKeepAwake = false;
-    let timeType = 'countdown'; // 'countdown' | 'at_time'
+    let timeType = 'countdown';
     let mode = 'shutdown';
     let isRunning = false;
 
-    const ring = document.getElementById('progressRing');
-    const circumference = 2 * Math.PI * 70; // ~439.8
+    const gauge = document.getElementById('gaugeProgress');
+    const circumference = 2 * Math.PI * 72; // ~452.38
 
-    const colors = {
-      shutdown: { main: '#ff453a', glow: 'rgba(255, 69, 58, 0.35)' },
-      sleep:    { main: '#bf5af2', glow: 'rgba(191, 90, 242, 0.35)' },
-      restart:  { main: '#00f2fe', glow: 'rgba(0, 242, 254, 0.35)' },
-      lock:     { main: '#ffd60a', glow: 'rgba(255, 214, 10, 0.35)' },
-      monitor:  { main: '#30d158', glow: 'rgba(48, 209, 88, 0.35)' }
+    const colorPalettes = {
+      shutdown: { main: '#ff3b30', glow: 'rgba(255, 59, 48, 0.32)' },
+      sleep:    { main: '#af52de', glow: 'rgba(175, 82, 222, 0.32)' },
+      restart:  { main: '#00f2fe', glow: 'rgba(0, 242, 254, 0.32)' },
+      lock:     { main: '#ffd60a', glow: 'rgba(255, 214, 10, 0.32)' },
+      monitor:  { main: '#30d158', glow: 'rgba(48, 209, 88, 0.32)' }
     };
 
     function playClick() {
@@ -735,16 +865,14 @@
         const gain = audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.frequency.exponentialRampToValueAtTime(320, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
-      } catch(e) {
-        console.error("Audio error:", e);
-      }
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch(e) {}
     }
 
     function playBeep(freq = 600) {
@@ -761,9 +889,7 @@
         gain.connect(audioCtx.destination);
         osc.start();
         osc.stop(audioCtx.currentTime + 0.15);
-      } catch(e) {
-        console.error("Beep error:", e);
-      }
+      } catch(e) {}
     }
 
     function toggleMute() {
@@ -774,24 +900,21 @@
       }
     }
 
-    function showToast(msg, isSuccess = false) {
+    function showToast(msg) {
       const t = document.getElementById('toast');
       t.innerText = msg;
-      t.className = 'toast-banner' + (isSuccess ? ' success' : '') + ' show';
+      t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3500);
     }
 
     function toggleKeepAwake() {
       isKeepAwake = !isKeepAwake;
       const btn = document.getElementById('caffeineBtn');
-      const txt = document.getElementById('caffeineText');
       if (isKeepAwake) {
         btn.classList.add('active');
-        txt.innerText = 'KEEP-AWAKE: ON';
-        showToast('Режим Caffeine активен (ПК не уснёт)', true);
+        showToast('☕ Keep-Awake активен: ПК не уснет во время задачи');
       } else {
         btn.classList.remove('active');
-        txt.innerText = 'KEEP-AWAKE: OFF';
       }
       if (window.pywebview && window.pywebview.api) {
         window.pywebview.api.set_keep_awake(isKeepAwake);
@@ -804,17 +927,17 @@
       document.getElementById('tabCountdown').classList.toggle('active', type === 'countdown');
       document.getElementById('tabAtTime').classList.toggle('active', type === 'at_time');
       document.getElementById('countdownInputs').style.display = (type === 'countdown') ? 'flex' : 'none';
-      document.getElementById('presetRow').style.display = (type === 'countdown') ? 'grid' : 'none';
+      document.getElementById('quickChips').style.display = (type === 'countdown') ? 'grid' : 'none';
       document.getElementById('atTimeInputs').style.display = (type === 'at_time') ? 'flex' : 'none';
       updatePreview();
     }
 
     function selectMode(m) {
       mode = m;
-      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.action-mode-card').forEach(b => b.classList.remove('active'));
       document.getElementById('m_' + m).classList.add('active');
 
-      const col = colors[m];
+      const col = colorPalettes[m];
       document.documentElement.style.setProperty('--accent', col.main);
       document.documentElement.style.setProperty('--accent-glow', col.glow);
       updatePreview();
@@ -835,21 +958,21 @@
 
     function updatePreview() {
       if (isRunning) return;
-      const names = { shutdown: 'ВЫКЛЮЧЕНИЕ', sleep: 'СОН', restart: 'СБРОС', lock: 'БЛОК', monitor: 'ЭКРАН' };
+      const modeNames = { shutdown: 'ВЫКЛЮЧЕНИЕ', sleep: 'РЕЖИМ СНА', restart: 'ПЕРЕЗАГРУЗКА', lock: 'БЛОКИРОВКА', monitor: 'ВЫКЛ ДИСПЛЕЯ' };
 
       if (timeType === 'countdown') {
         const secs = calculateCountdownSecs();
         const h = Math.floor(secs / 3600);
         const m = Math.floor((secs % 3600) / 60);
-        document.getElementById('timeText').innerText =
-          String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-        document.getElementById('subText').innerText = names[mode] + ' READY';
+        document.getElementById('timeDigits').innerText =
+          String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':00';
+        document.getElementById('badgeText').innerText = modeNames[mode] + ' // ГОТОВ';
       } else {
         const atVal = document.getElementById('inpAtTime').value || '00:00';
-        document.getElementById('timeText').innerText = atVal;
-        document.getElementById('subText').innerText = names[mode] + ' В ' + atVal;
+        document.getElementById('timeDigits').innerText = atVal + ':00';
+        document.getElementById('badgeText').innerText = modeNames[mode] + ' В ' + atVal;
       }
-      ring.style.strokeDashoffset = circumference;
+      gauge.style.strokeDashoffset = circumference;
     }
 
     document.getElementById('inpH').addEventListener('input', updatePreview);
@@ -879,10 +1002,7 @@
               sel.appendChild(opt);
             });
           }
-        } catch(e) {
-          console.error("loadProcesses error:", e);
-          showToast("Ошибка получения списка процессов");
-        }
+        } catch(e) {}
       }
     }
 
@@ -912,11 +1032,10 @@
         } else {
           atTimeStr = document.getElementById('inpAtTime').value;
           if (!atTimeStr) {
-            showToast("Укажите целевое время!");
+            showToast("Укажите время выключения!");
             return;
           }
         }
-
         res = await window.pywebview.api.start_timer(mode, secs, timeType, atTimeStr, isKeepAwake);
       } else {
         let guardParam = null;
@@ -934,7 +1053,7 @@
 
       if (res && res.success) {
         setUIRunning(true);
-        showToast("Таймер успешно активирован!", true);
+        showToast("Таймер успешно активирован");
       } else {
         showToast((res && res.error) ? res.error : "Ошибка запуска таймера");
       }
@@ -944,9 +1063,7 @@
       if (window.pywebview && window.pywebview.api) {
         try {
           await window.pywebview.api.cancel_timer();
-        } catch(e) {
-          console.error("Cancel timer error:", e);
-        }
+        } catch(e) {}
       }
       setUIRunning(false);
       updatePreview();
@@ -958,12 +1075,10 @@
         try {
           const res = await window.pywebview.api.snooze(mins);
           if (res && res.success) {
-            showToast(`Добавлено +${mins} мин!`, true);
+            showToast(`+${mins} мин добавлено!`);
             document.getElementById('warnOverlay').classList.remove('active');
           }
-        } catch(e) {
-          console.error("Snooze error:", e);
-        }
+        } catch(e) {}
       }
     }
 
@@ -973,16 +1088,16 @@
       if (running) {
         btn.innerText = '✕ ОТМЕНИТЬ ТАЙМЕР';
         btn.classList.add('running');
-        document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = false);
+        document.querySelectorAll('.snooze-pill').forEach(b => b.disabled = false);
       } else {
         btn.innerText = '▶ ЗАПУСТИТЬ ТАЙМЕР';
         btn.classList.remove('running');
-        document.querySelectorAll('.snooze-btn').forEach(b => b.disabled = true);
+        document.querySelectorAll('.snooze-pill').forEach(b => b.disabled = true);
         document.getElementById('warnOverlay').classList.remove('active');
       }
     }
 
-    // State Polling loop (Python Single Source of Truth)
+    // State Polling Loop (Python Single Source of Truth)
     setInterval(async () => {
       if (window.pywebview && window.pywebview.api) {
         try {
@@ -1004,43 +1119,44 @@
 
             const h = Math.floor(rem / 3600);
             const m = Math.floor((rem % 3600) / 60);
-            document.getElementById('timeText').innerText =
-              String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
-            document.getElementById('subText').innerText = 'ОСТАЛОСЬ ' + rem + ' СЕК';
+            const s = rem % 60;
+            document.getElementById('timeDigits').innerText =
+              String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            document.getElementById('badgeText').innerText = 'ОСТАЛОСЬ ' + rem + ' СЕК';
 
             const offset = circumference - (rem / tot) * circumference;
-            ring.style.strokeDashoffset = Math.max(0, offset);
+            gauge.style.strokeDashoffset = Math.max(0, offset);
           } else if (state.guard_active) {
             if (!isRunning) setUIRunning(true);
-            document.getElementById('timeText').innerText = "GUARD";
-            document.getElementById('subText').innerText = "ЗАЩИТА АКТИВНА";
-            ring.style.strokeDashoffset = 0;
+            document.getElementById('timeDigits').innerText = "GUARD";
+            document.getElementById('badgeText').innerText = "МОНИТОРИНГ АКТИВЕН";
+            gauge.style.strokeDashoffset = 0;
           } else {
             if (isRunning) {
               setUIRunning(false);
               updatePreview();
             }
           }
-        } catch(e) {
-          console.error("Polling error:", e);
-        }
+        } catch(e) {}
       }
     }, 500);
 
-    // Telemetry Polling (CPU/RAM)
+    // Live Telemetry Polling (CPU / RAM)
     setInterval(async () => {
       if (window.pywebview && window.pywebview.api) {
         try {
           const stats = await window.pywebview.api.get_system_stats();
-          document.getElementById('cpuVal').innerText = stats.cpu + '%';
-          document.getElementById('cpuBar').style.width = stats.cpu + '%';
-          document.getElementById('ramVal').innerText = stats.ram + '%';
-          document.getElementById('ramBar').style.width = stats.ram + '%';
-        } catch(e) {
-          console.error("Telemetry error:", e);
-        }
+          const cpu = Math.max(0, stats.cpu);
+          const ram = Math.max(0, stats.ram);
+
+          document.getElementById('cpuText').innerText = cpu + '%';
+          document.getElementById('cpuBar').style.width = cpu + '%';
+
+          document.getElementById('ramText').innerText = ram + '%';
+          document.getElementById('ramBar').style.width = ram + '%';
+        } catch(e) {}
       }
-    }, 2000);
+    }, 1000);
 
     // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
@@ -1058,10 +1174,10 @@
       }
     });
 
-    // Fallback Window Dragging for headers
+    // Fallback Window Dragging for non-Webkit
     let isDragging = false, startX = 0, startY = 0;
     document.getElementById('headerBar').addEventListener('mousedown', (e) => {
-      if (e.target.classList.contains('win-btn')) return;
+      if (e.target.classList.contains('btn-icon')) return;
       isDragging = true; startX = e.screenX; startY = e.screenY;
     });
 
@@ -1086,9 +1202,7 @@
 
           const awake = await window.pywebview.api.get_keep_awake();
           if (awake) toggleKeepAwake();
-        } catch(e) {
-          console.error("Init prefs error:", e);
-        }
+        } catch(e) {}
       }
     });
 

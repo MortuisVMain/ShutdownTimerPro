@@ -1,30 +1,31 @@
-# ⚡ ShutdownTimerPro (ПК Таймер Ultra Pro HUD 2.0)
+# ⚡ ShutdownTimerPro (Obsidian Cyber HUD 3.0)
 
-[![Release](https://img.shields.io/badge/release-v0.2.0--alpha-orange.svg)](https://github.com/MortuisVMain/ShutdownTimerPro/releases)
-[![Status](https://img.shields.io/badge/status-Alpha%20v0.2.0-blue.svg)](https://github.com/MortuisVMain/ShutdownTimerPro)
+[![Release](https://img.shields.io/badge/release-v0.3.0--alpha-orange.svg)](https://github.com/MortuisVMain/ShutdownTimerPro/releases)
+[![Status](https://img.shields.io/badge/status-Alpha%20v0.3.0-blue.svg)](https://github.com/MortuisVMain/ShutdownTimerPro)
 [![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![GUI Framework](https://img.shields.io/badge/GUI-pywebview%20%2B%20HTML5-cyan.svg)](https://pywebview.flowrl.com/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-0078D6.svg)](https://microsoft.com/windows)
 
-A modern, high-tech PC Shutdown Timer & Power Manager featuring a **Cyber HUD 2.0 Interface**, real-time hardware telemetry (CPU & RAM), web audio synthesizer, and Smart Guard protections.
+A modern, precision PC Power Controller & Shutdown Timer featuring a **Raycast & Linear-inspired Obsidian Cyber UI**, live hardware telemetry with dedicated sampling, web audio synthesizer, and Smart Guard protections.
 
-> 🚀 **Current Version**: **v0.2.0-alpha** (Modular Win32 Core, Wall-Clock mode, Monitor Power, Keep-Awake).
+> 🚀 **Current Version**: **v0.3.0-alpha** (Obsidian Cyber-Precision UI, Live CPU Sampler, Wall-Clock mode, Monitor Power, Keep-Awake).
 
 ---
 
 ## ✨ Features
 
-- 🖥️ **Cyber HUD 2.0 Interface**: Sleek Glassmorphism UI with smooth native dragging (`-webkit-app-region: drag`), offline font fallbacks, and real-time state polling.
+- 🖥️ **Obsidian Cyber-Precision UI**: Minimalist, high-contrast dark aesthetic with micro-grid textures, Swiss Chrono gauge tick marks, and smooth animations.
+- 📊 **Real-time Telemetry Sampler**: Continuous background sampling thread ensuring accurate, live CPU and RAM load percentages without 0% freezes.
 - 🕒 **Dual Timing Modes**:
-  - **⏱ Countdown ("Через время")**: Classic countdown for specified hours and minutes.
-  - **🕒 Wall-Clock ("В точное время")**: Schedule actions for an exact time (e.g. `02:30`), with automatic next-day delta calculation.
+  - **⏱ Countdown ("Таймер")**: High-precision countdown with seconds readout (`00:30:00`).
+  - **🕒 Wall-Clock ("Точное время")**: Schedule actions for an exact time (e.g. `02:30`) with automatic next-day delta calculation.
 - ⚡ **5 Power Modes**:
   - ⏻ **Shutdown** (`shutdown -s`)
   - ☾ **Sleep** (`powrprof.dll,SetSuspendState`)
   - ⟳ **Restart** (`shutdown -r`)
   - 🔒 **Lock** (`user32.dll,LockWorkStation`)
-  - 🖥️ **Turn Off Display / Monitor** (`SendMessage SC_MONITORPOWER, 2`) — powers off displays without suspending the PC.
+  - 🖥️ **Turn Off Display / Monitor** (`SendMessage SC_MONITORPOWER, 2`) — powers off displays without sleeping the PC.
 - ☕ **Caffeine / Keep-Awake Mode**: Prevents Windows from automatically sleeping during long downloads or video renders via Win32 `SetThreadExecutionState`.
 - 🔒 **Single Instance Win32 Mutex**: Atomic instance lock via `CreateMutexW` and clean loopback restore signal.
 - 🛡️ **Smart Guard Protections**:
@@ -40,14 +41,14 @@ A modern, high-tech PC Shutdown Timer & Power Manager featuring a **Cyber HUD 2.
 
 ## 📥 Download Release (.exe)
 
-Download the standalone standalone executable directly from the [Releases Page](https://github.com/MortuisVMain/ShutdownTimerPro/releases/tag/v0.2.0-alpha):
-- 📦 **[ShutdownTimerPro_v0.2.0-alpha.exe](https://github.com/MortuisVMain/ShutdownTimerPro/releases/download/v0.2.0-alpha/ShutdownTimerPro_v0.2.0-alpha.exe)**
+Download the standalone executable directly from the [Releases Page](https://github.com/MortuisVMain/ShutdownTimerPro/releases/tag/v0.3.0-alpha):
+- 📦 **[ShutdownTimerPro_v0.3.0-alpha.exe](https://github.com/MortuisVMain/ShutdownTimerPro/releases/download/v0.3.0-alpha/ShutdownTimerPro_v0.3.0-alpha.exe)**
 
 ---
 
-## 🛠️ Architecture
+## 🛠️ Architecture & Tests
 
-See our Architecture Decision Records in [`docs/adr/001-timer-architecture-and-win32.md`](docs/adr/001-timer-architecture-and-win32.md) for details on the Single Source of Truth `TimerEngine` and Win32 integration.
+See our Architecture Decision Records in [`docs/adr/001-timer-architecture-and-win32.md`](docs/adr/001-timer-architecture-and-win32.md).
 
 ```bash
 # Run unit tests
